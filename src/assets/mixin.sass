@@ -1,0 +1,17 @@
+/*!
+ / Copyright (c) QJJS. All rights reserved.
+ / ProjectName: Qingyin.Web
+ / FileName : mixin.sass
+ / Author : lyh67
+ / Date : 2020-04-09 15:08:44
+ /
+@mixin flex-center($direction:row,$justify:center,$align:center,$flex-wrap: null)
+  display: flex
+  @if($flex-wrap != null)
+    flex-wrap: $flex-wrap
+  @if($direction != null)
+    flex-direction: $direction
+  @if($justify != null)
+    justify-content: $justify
+  @if($align != null)
+    align-items: $align

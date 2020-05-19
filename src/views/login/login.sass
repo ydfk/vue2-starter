@@ -1,0 +1,46 @@
+/*!
+ / Copyright (c) QJJS. All rights reserved.
+ / ProjectName: Qinyin.Web
+ / FileName : login.sass
+ / Author : liyuhang
+ / Date : 2020-02-29 16:38:34
+ /
+@import "../../assets/var"
+
+.login
+  position: relative
+  .box
+    width: 600px
+    background-color: white
+    border-radius: 3px
+    padding: 40px
+    .title
+      font-weight: bold
+      font-size: 19px
+    .subtitle
+      color: #888
+      margin-top: 20px
+    .form
+      margin-top: 50px
+    .loginBtn
+      margin-top: 10px
+    .loginFooter
+      margin-top: 20px
+      display: flex
+      display: -webkit-flex
+      justify-content: space-between
+      align-items: center
+  .header
+    background-color: white
+    height: $header-height
+    line-height: $header-height
+    .userName
+      text-align: right
+  .contentBox
+    min-height: calc(100vh - #{$header-height*2})
+    padding: 60px 80px 80px 80px
+    background-image: url("../../assets/images/introduce/slogan.png")
+    background-size: 100% 100%
+    background-repeat: no-repeat
+  .ant-input
+     height: 40px !important

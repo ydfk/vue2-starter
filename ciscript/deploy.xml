@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<project name="ConsoleAnt" default="deploy" basedir=".">
+	<echo message="${configurationName}"/>
+	<echo message="${teamcity.build.checkoutDir}"/>
+	<target name="deploy">
+		<exec executable="/bin/sh" failonerror="true">
+			<arg value="-c" />
+			<arg value="bash deploy.sh '${configurationName}' '${teamcity.build.checkoutDir}'" />
+		</exec>
+	</target>
+</project>
