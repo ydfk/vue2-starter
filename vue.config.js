@@ -1,6 +1,6 @@
 const env = process.env.NODE_ENV;
 const production = env === "production";
-const target = process.env.ApiHost;
+const target = process.env.VUE_APP_API_HOST;
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const tsImportPluginFactory = require("ts-import-plugin");
@@ -76,7 +76,7 @@ module.exports = {
             warnings: false,
             compress: {
               drop_console: true,
-              drop_debugger: true
+              drop_debugger: true,
             },
           },
         }),
@@ -99,9 +99,7 @@ module.exports = {
         javascriptEnabled: true,
       },
       postcss: {
-        plugins: [
-          autoprefixer()
-        ],
+        plugins: [autoprefixer()],
       },
     },
   },
@@ -109,33 +107,22 @@ module.exports = {
   devServer: {
     open: true,
     disableHostCheck: true,
-    port: process.env.Port || 15000,
+    port: process.env.VUE_APP_PORT || 3000,
     https: false,
     hotOnly: false,
     overlay: {
       warnings: false,
       errors: true,
     },
-    // proxy: {
-    //   "/api": {
-    //     target: target,
-    //     changeOrigin: true,
-    //     ws: true,
-    //     pathRewrite: {
-    //       "^/api": ""
-    //     }
-    //   }
-    // }
-    before(app) {
-      app.get("/api/token", (req, res) => {
-        res.json(require("./mock/token.json"));
-      });
-      app.get("/api/token/refresh", (req, res) => {
-        res.json(require("./mock/token.json"));
-      });
-      app.get("/api/user/login", (req, res) => {
-        res.json(require("./mock/user.json"));
-      });
+    proxy: {
+      "/api": {
+        target: target,
+        changeOrigin: true,
+        ws: true,
+        pathRewrite: {
+          "^/api": "",
+        },
+      },
     },
   },
 };

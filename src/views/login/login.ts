@@ -23,8 +23,6 @@ import { FORM_LOGIN, INPUT_MAX_LENGTH_15, INPUT_MAX_LENGTH_30, REGEX_NO_SPACE, R
   },
 })
 export default class Login extends Mixins(FormMixin, ComMixin) {
-  code = "";
-  password = "";
   loading = false;
   showRegistration = false;
   showRetrievePassword = false;
@@ -54,7 +52,7 @@ export default class Login extends Mixins(FormMixin, ComMixin) {
     this.form(this.formRef).validate(async (valid) => {
       if (valid) {
         this.loading = true;
-        const apiReturn = await apiLogin(this.code, this.password);
+        const apiReturn = await apiLogin(this.loginForm.code, this.loginForm.password);
         this.loading = false;
 
         if (apiReturn.result) {
