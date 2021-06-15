@@ -8,13 +8,16 @@
 
 import { Component, Mixins } from "vue-property-decorator";
 import FormMixin from "@/mixins/formMixin";
-import { apiLogin } from "@/apis/apis";
+import { apiLogin } from "@/apis/loginApis";
 import ComMixin from "@/mixins/comMixin";
 import { Action, Getter } from "vuex-class";
 import { A_USER_SIGN, A_USER_SIGNOUT } from "@/store/store.types";
-import { TokenModel, UserModel } from "@/commons/models";
-import { Logo, Footer } from "@/components/index";
-import { FORM_LOGIN, INPUT_MAX_LENGTH_15, INPUT_MAX_LENGTH_30, REGEX_NO_SPACE, ROUTER_HOME, RULE_NO_SPACE } from "@/commons/constants";
+import { TokenModel, UserModel } from "@/commons/models/loginModel";
+import Logo from "@/components/layout/logo/logo.vue";
+import Footer from "@/components/layout/footer.vue";
+import { FORM_LOGIN, INPUT_MAX_LENGTH_15, INPUT_MAX_LENGTH_30, REGEX_NO_SPACE, RULE_NO_SPACE } from "@/commons/constants";
+import { getMaxLengthRule, getRequireRule } from "@/commons/validate";
+import { RouterEnum } from "@/commons/enums";
 
 @Component({
   components: {
@@ -34,8 +37,8 @@ export default class Login extends Mixins(FormMixin, ComMixin) {
   };
 
   rules = {
-    code: [this.getRequireRule("请输入手机号"), this.getMaxRule(INPUT_MAX_LENGTH_15), RULE_NO_SPACE],
-    password: [this.getRequireRule("请输入密码"), this.getMaxRule(INPUT_MAX_LENGTH_30), RULE_NO_SPACE],
+    code: [getRequireRule("请输入手机号"), getMaxLengthRule(INPUT_MAX_LENGTH_15), RULE_NO_SPACE],
+    password: [getRequireRule("请输入密码"), getMaxLengthRule(INPUT_MAX_LENGTH_30), RULE_NO_SPACE],
   };
 
   mounted() {
@@ -57,10 +60,10 @@ export default class Login extends Mixins(FormMixin, ComMixin) {
 
         if (apiReturn.result) {
           await this.userSign(apiReturn.data);
-          this.openSuccessMsg("登录成功");
-          await this.$router.push(ROUTER_HOME);
+          this.$message.success("登录成功");
+          await this.$router.push({ name: RouterEnum.example });
         } else {
-          this.openErrorMsg(`登录失败！${apiReturn.msg}`);
+          this.$message.error(`登录失败！${apiReturn.msg}`);
           this.form(this.formRef).resetFields();
         }
       }
@@ -87,6 +90,6 @@ export default class Login extends Mixins(FormMixin, ComMixin) {
     this.$router.push("/");
   }
 
-  @Action(A_USER_SIGNOUT) userSignOut!: () => {};
-  @Action(A_USER_SIGN) userSign!: (tokenModel: TokenModel | undefined) => {};
+  @Action(A_USER_SIGNOUT) userSignOut!: () => void;
+  @Action(A_USER_SIGN) userSign!: (tokenModel: TokenModel | undefined) => void;
 }

@@ -7,14 +7,15 @@
  */
 
 import { Component, Watch, Mixins } from "vue-property-decorator";
-import { ROUTER_HOME, ROUTER_LOGIN } from "@/commons/constants";
 import { Route } from "vue-router";
 import { routeToArray } from "@/commons/method";
 import ComMixin from "@/mixins/comMixin";
 import { Action, Getter } from "vuex-class";
 import { A_USER_SIGNOUT, G_USER } from "@/store/store.types";
-import { UserModel } from "@/commons/models";
-import { Logo } from "@/components/index";
+import { UserModel } from "@/commons/models/loginModel";
+import Logo from "@/components/layout/logo/logo.vue";
+import { openConfirmModal } from "../dialog/dialogCommon";
+import { RouterEnum } from "@/commons/enums";
 
 @Component({
   components: {
@@ -27,7 +28,7 @@ export default class Header extends Mixins(ComMixin) {
   menuKeys: string[] = [];
   menuOpenKeysKeys: string[] = [];
 
-  router_home = ROUTER_HOME;
+  router_home = RouterEnum.example;
 
   get showUser() {
     return this.user.name != "";
@@ -35,7 +36,7 @@ export default class Header extends Mixins(ComMixin) {
 
   created() {
     if (this.menuKeys.length == 0) {
-      this.menuKeys = [ROUTER_HOME];
+      this.menuKeys = [RouterEnum.home];
     }
   }
 
@@ -51,10 +52,10 @@ export default class Header extends Mixins(ComMixin) {
   onUserNameMenuClick(params: { item: any; key: string; keyPath: string[] }) {
     switch (params.key) {
       case "0":
-        this.openConfirmModal("退出登录", "您确认要退出登录吗？", () => {
+        openConfirmModal("退出登录", "您确认要退出登录吗？", () => {
           this.singOut();
-          this.$router.replace(ROUTER_LOGIN);
-          this.openSuccessMsg("您已成功退出！");
+          this.$router.replace(RouterEnum.login);
+          this.$message.success("您已成功退出！");
         });
         break;
       default:
@@ -64,7 +65,7 @@ export default class Header extends Mixins(ComMixin) {
 
   onMenuClick(params: { key: string }) {
     console.log(params.key);
-    this.$router.push(params.key);
+    this.$router.push({ name: params.key });
   }
 
   onMenuOpenChange(openKeys: Array<string>) {
@@ -76,7 +77,7 @@ export default class Header extends Mixins(ComMixin) {
   }
 
   onLogoClick() {
-    this.$router.push(ROUTER_HOME);
+    this.$router.push(RouterEnum.home);
   }
 
   @Getter(G_USER) user!: UserModel;

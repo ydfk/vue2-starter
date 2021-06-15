@@ -1,3 +1,10 @@
+/*
+ * @Description: Copyright (c) ydfk. All rights reserved
+ * @Author: ydfk
+ * @Date: 2020-05-19 10:16:37
+ * @LastEditors: ydfk
+ * @LastEditTime: 2021-06-15 15:09:41
+ */
 module.exports = {
   root: true,
   env: {
@@ -9,9 +16,16 @@ module.exports = {
   },
   rules: {
     "no-console": process.env.NODE_ENV === "production" ? "error" : "off",
-    "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",
-    "@typescript-eslint/camelcase": "error",
+    "no-debugger": "error",
+    "@typescript-eslint/naming-convention": [
+      "error",
+      {
+        selector: "variable",
+        format: ["camelCase", "UPPER_CASE"],
+      },
+    ],
     "@typescript-eslint/no-empty-function": "off",
-    "@typescript-eslint/ban-ts-ignore": "off",
+    "@typescript-eslint/ban-ts-comment": "off",
+    "@typescript-eslint/no-use-before-define": "warn",
   },
 };

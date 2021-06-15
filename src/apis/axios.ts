@@ -9,13 +9,13 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import store from "@/store/index";
 import router from "@/router/index";
-import { ContentType, HttpMethod } from "@/commons/enums";
+import { ContentType, HttpMethod, RouterEnum } from "@/commons/enums";
 import { getUrlWithOutParams } from "@/commons/method";
-import { ROUTER_ERROR, ROUTER_LOGIN, TOKEN_EXPIRE_MSG } from "@/commons/constants";
+import { TOKEN_EXPIRE_MSG } from "@/commons/constants";
 import { A_USER_CHECK, G_TOKEN } from "@/store/store.types";
 import { message } from "ant-design-vue";
-import { ApiReturn } from "@/commons/models";
-import { API_REFRESH_TOKEN, NO_TOKEN_APIS } from "@/apis/apis";
+import { ApiReturn } from "@/commons/models/baseModel";
+import { API_REFRESH_TOKEN, NO_TOKEN_APIS } from "@/apis/apiConst";
 
 interface AxiosOption extends AxiosRequestConfig {
   contentType?: ContentType;
@@ -37,7 +37,7 @@ const setToken = async (config: AxiosRequestConfig) => {
       } catch (e) {
         await message.warn(TOKEN_EXPIRE_MSG);
         await router.replace({
-          name: ROUTER_LOGIN,
+          name: RouterEnum.login,
           params: { redirect: router.currentRoute.fullPath },
         });
       }
@@ -118,27 +118,27 @@ class AxiosUtil {
     });
   }
 
-  public async get<T = any>(url: string, data?: object, convertResult = true): Promise<T> {
+  public async get<T = any>(url: string, data?: any, convertResult = true): Promise<T> {
     const res = await this.axios.get(url, { params: data });
     return this.handelResponse<T>(res, convertResult);
   }
 
-  public async post<T = any>(url: string, data?: object, convertResult = true): Promise<T> {
+  public async post<T = any>(url: string, data?: any, convertResult = true): Promise<T> {
     const res = await this.axios.post(url, JSON.stringify(data));
     return this.handelResponse<T>(res, convertResult);
   }
 
-  public async put<T = any>(url: string, data?: object, convertResult = true): Promise<T> {
+  public async put<T = any>(url: string, data?: any, convertResult = true): Promise<T> {
     const res = await this.axios.put(url, JSON.stringify(data));
     return this.handelResponse<T>(res, convertResult);
   }
 
-  public async patch<T = any>(url: string, data?: object, convertResult = true): Promise<T> {
+  public async patch<T = any>(url: string, data?: any, convertResult = true): Promise<T> {
     const res = await this.axios.patch(url, JSON.stringify(data));
     return this.handelResponse<T>(res, convertResult);
   }
 
-  public async delete<T = any>(url: string, data?: object, convertResult = true): Promise<T> {
+  public async delete<T = any>(url: string, data?: any, convertResult = true): Promise<T> {
     const res = await this.axios.delete(url, { data: data });
     return this.handelResponse<T>(res, convertResult);
   }
@@ -150,7 +150,7 @@ class AxiosUtil {
         if (convertResult) {
           if (!apiReturn.result) {
             const errorMsg = apiReturn.msg;
-            router.replace({ name: ROUTER_ERROR, params: { msg: errorMsg } });
+            router.replace({ name: RouterEnum.error, params: { msg: errorMsg } });
           }
           return apiReturn.data as T;
         } else {

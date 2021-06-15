@@ -64,12 +64,4 @@ export default class FormMixin extends Vue {
   form(refName: string) {
     return this.$refs[refName] as FormModel;
   }
-
-  getMaxRule(maxLength: number, msg?: string) {
-    return { max: maxLength, message: msg || `长度不能超过${maxLength}位` };
-  }
-
-  getRequireRule(msg: string) {
-    return { required: true, message: msg };
-  }
 }

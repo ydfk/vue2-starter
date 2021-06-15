@@ -7,8 +7,9 @@
  */
 
 import { Vue, Component, Mixins, Prop } from "vue-property-decorator";
-import { ROUTER_HOME, SYSTEM_NAME } from "@/commons/constants";
+import { SYSTEM_NAME } from "@/commons/constants";
 import ComMixin from "@/mixins/comMixin";
+import { RouterEnum } from "@/commons/enums";
 
 @Component
 export default class Logo extends Mixins(ComMixin) {
@@ -17,7 +18,7 @@ export default class Logo extends Mixins(ComMixin) {
 
   onLogoClick() {
     if (this.canClick) {
-      this.$router.push(ROUTER_HOME);
+      this.$router.push({ name: RouterEnum.home });
     }
   }
 }

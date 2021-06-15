@@ -9,10 +9,10 @@
 import { Vue, Component, Mixins } from "vue-property-decorator";
 import { A_LOADED, G_USER } from "@/store/store.types";
 import { Action, Getter } from "vuex-class";
-import { ROUTER_LOGIN } from "@/commons/constants";
-import { UserModel } from "@/commons/models";
+import { UserModel } from "@/commons/models/loginModel";
 import ComMixin from "@/mixins/comMixin";
 import errorSvg from "@/assets/images/500.svg";
+import { RouterEnum } from "@/commons/enums";
 
 @Component({
   components: {
@@ -28,9 +28,8 @@ export default class Error extends Mixins(ComMixin) {
   }
 
   onHandleToHome() {
-    this.$router.replace(ROUTER_LOGIN);
+    this.$router.replace(RouterEnum.login);
   }
 
-  @Action(A_LOADED) hideLoading: any;
   @Getter(G_USER) user!: UserModel;
 }

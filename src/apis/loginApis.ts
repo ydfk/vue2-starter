@@ -6,14 +6,10 @@
  * Date : 2020-02-29 18:09:06
  */
 
-import { ApiReturn, TokenModel, UserModel } from "@/commons/models";
 import axios from "@/apis/axios";
-
-export const API_REFRESH_TOKEN = "token/refresh";
-export const API_LOGIN = "token";
-
-// 无需token的api
-export const NO_TOKEN_APIS = [API_LOGIN];
+import { API_LOGIN, API_REFRESH_TOKEN } from "@/apis/apiConst";
+import { ApiReturn } from "@/commons/models/baseModel";
+import { TokenModel, UserModel } from "@/commons/models/loginModel";
 
 export const apiLogin = (code: string, password: string): Promise<ApiReturn<TokenModel>> => {
   return axios.get<ApiReturn<TokenModel>>(`${API_LOGIN}?code=${code}&password=${password}`, undefined, false);

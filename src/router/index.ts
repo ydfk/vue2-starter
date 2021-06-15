@@ -9,10 +9,11 @@ import Vue from "vue";
 import VueRouter from "vue-router";
 import NProgress from "nprogress";
 import "nprogress/nprogress.css";
-import { NO_TOKEN, ROUTER_HOME, ROUTER_LOGIN, TOKEN_EXPIRE_MSG } from "@/commons/constants";
+import { NO_TOKEN, TOKEN_EXPIRE_MSG } from "@/commons/constants";
 import store from "@/store/index";
 import { A_USER_CHECK } from "@/store/store.types";
 import { message } from "ant-design-vue";
+import { RouterEnum } from "@/commons/enums";
 
 NProgress.configure({ showSpinner: false });
 Vue.use(VueRouter);
@@ -20,17 +21,26 @@ Vue.use(VueRouter);
 const routes = [
   {
     path: `/`,
-    name: ROUTER_LOGIN,
+    name: RouterEnum.login,
     meta: {
       needAuth: false,
     },
     component: () => import("@/views/login/login.vue"),
   },
   {
-    path: `/${ROUTER_HOME}`,
-    name: ROUTER_HOME,
+    path: `/${RouterEnum.home}`,
+    name: RouterEnum.home,
     component: () => import("@/views/home/home.vue"),
-    children: [],
+    children: [
+      {
+        path: RouterEnum.example,
+        name: RouterEnum.example,
+        component: () => import("@/views/example/example.vue"),
+        meta: {
+          title: "示例",
+        },
+      },
+    ],
   },
 ];
 
@@ -56,7 +66,7 @@ router.beforeEach((to, from, next) => {
           console.log(NO_TOKEN);
           message.warn(TOKEN_EXPIRE_MSG);
         }
-        next({ name: ROUTER_LOGIN, params: { redirect: to.fullPath } });
+        next({ name: RouterEnum.login, params: { redirect: to.fullPath } });
       });
   } else {
     next();

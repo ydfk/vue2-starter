@@ -26,18 +26,12 @@
               <a-input type="password" placeholder="密码" v-model="loginForm.password" />
             </a-form-model-item>
           </a-form-model>
-          <a-button type="primary" html-type="submit" class="loginBtn" :loading="loading" block @click.enter="onSubmit">
-            登录
-          </a-button>
+          <a-button type="primary" html-type="submit" class="loginBtn" :loading="loading" block @click.enter="onSubmit"> 登录 </a-button>
           <div class="loginFooter">
-            <a @click="onForget">
-              忘记密码？
-            </a>
+            <a @click="onForget"> 忘记密码？ </a>
             <span>
               还没账号？
-              <a @click="onRegister">
-                注册
-              </a>
+              <a @click="onRegister"> 注册 </a>
             </span>
           </div>
         </div>

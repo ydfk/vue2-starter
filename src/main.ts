@@ -40,13 +40,10 @@ import {
   Select,
   Statistic,
 } from "ant-design-vue";
-import vuescroll from "vuescroll";
 
 process.env.VUE_APP_MOCK && require("../mock/mock.js");
 
 moment.locale("zh-cn");
-
-Vue.use(vuescroll);
 
 Vue.use(VueBus);
 

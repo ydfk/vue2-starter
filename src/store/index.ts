@@ -17,10 +17,10 @@ import {
   A_USER_REFRESH,
 } from "@/store/store.types";
 import persistedState from "vuex-persistedstate";
-import { TokenModel, UserModel } from "@/commons/models";
+import { TokenModel, UserModel } from "@/commons/models/loginModel";
 import moment from "moment";
 import { NO_LOGIN, NO_TOKEN, TOKEN_REFRESH } from "@/commons/constants";
-import { apiGetLoginUser, apiRefreshToken } from "@/apis/apis";
+import { apiGetLoginUser, apiRefreshToken } from "@/apis/loginApis";
 
 Vue.use(Vuex);
 

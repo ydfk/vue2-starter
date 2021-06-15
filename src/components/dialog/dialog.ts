@@ -36,7 +36,7 @@ export default class Dialog extends Vue {
     return document.body.clientWidth - 100;
   }
 
-  get bodyStyle(): object {
+  get bodyStyle(): any {
     if (this.height) {
       return { height: `${this.modalHeight}px`, "max-height": `${this.maxHeight}px`, overflow: "auto" };
     } else {

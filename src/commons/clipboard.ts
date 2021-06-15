@@ -38,7 +38,7 @@ const selectText = () => {
 
 //复制到剪贴板
 export const copyToClipboard = (text: string) =>
-  new Promise((resolve, reject) => {
+  new Promise<void>((resolve, reject) => {
     try {
       createTextArea(text);
       selectText();

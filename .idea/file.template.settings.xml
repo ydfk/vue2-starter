@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ExportableFileTemplateSettings">
     <default_templates>
+      <template name="Vue 3 TypeScript.ts" reformat="true" live-template-enabled="true" />
       <template name="Vue TypeScript.ts" reformat="true" live-template-enabled="true" />
     </default_templates>
   </component>

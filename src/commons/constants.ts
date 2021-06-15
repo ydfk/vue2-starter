@@ -7,24 +7,16 @@
  */
 export const SYSTEM_NAME = "TEC前端框架";
 
-//router
-export const ROUTER_ERROR = "error";
-export const ROUTER_HOME = "home";
-export const ROUTER_LOGIN = "login";
-
 export const TOKEN_REFRESH = 300; //// token滑动刷新时间 单位为秒 用户活跃则 刷新token时间
-
-//vue-bus
-export const BUS_FORM_SUBMIT = "formSubmit";
-export const BUS_TABLE_REFRESH = "refreshTable";
-export const BUS_TABLE_EXPORT = "exportTable";
 
 export const TOKEN_EXPIRE_MSG = "长时间未操作，请重新登录";
 
 export const TIP_PASSWORD = "只能包含大小写字母、数字和特殊符号!@#$%^&*/\\_-.";
 export const REGEX_PASSWORD = "^[0-9|a-z|A-Z|!@#$%\\^&*/\\\\_-|.]{6,16}$"; // 密码正则表达式
 export const REGEX_NO_SPACE = "^[^\\s]*$"; // 禁止空格
+export const REGEX_AROUND_NO_SPACE = /^\S.*\S$|(^\S{0,1}\S$)/; // 禁止空格
 export const REGEX_MOBILE = /^1[3456789]\d{9}$/;
+export const REGEX_CHINESE = "[\u4E00-\u9FA5]"; // 中文
 
 export const INPUT_MAX_LENGTH_15 = 15; // 文本框最大输入长度15
 export const INPUT_MAX_LENGTH_30 = 30; // 文本框最大输入长度30

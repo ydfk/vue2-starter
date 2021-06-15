@@ -1,6 +1,7 @@
 const env = process.env.NODE_ENV;
 const production = env === "production";
 const target = process.env.VUE_APP_API_HOST;
+const path = require("path");
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const tsImportPluginFactory = require("ts-import-plugin");
@@ -123,6 +124,12 @@ module.exports = {
           "^/api": "",
         },
       },
+    },
+  },
+  pluginOptions: {
+    "style-resources-loader": {
+      preProcessor: "sass",
+      patterns: [path.resolve(__dirname, "./src/assets/*.sass")],
     },
   },
 };
