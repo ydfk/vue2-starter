@@ -3,7 +3,7 @@
  * @Author: ydfk
  * @Date: 2020-05-13 09:25:27
  * @LastEditors: ydfk
- * @LastEditTime: 2020-05-13 09:41:18
+ * @LastEditTime: 2021-06-15 21:28:33
  */
 import Vue from "vue";
 import App from "./App.vue";
@@ -39,6 +39,7 @@ import {
   Popover,
   Select,
   Statistic,
+  Card,
 } from "ant-design-vue";
 
 process.env.VUE_APP_MOCK && require("../mock/mock.js");
@@ -75,6 +76,7 @@ Vue.use(Radio);
 Vue.use(Popover);
 Vue.use(Select);
 Vue.use(Statistic);
+Vue.use(Card);
 
 Vue.prototype.$message = message;
 

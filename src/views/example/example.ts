@@ -7,7 +7,7 @@
  */
 
 import { defineComponent, reactive, toRefs } from "@vue/composition-api";
-import Card from "@/components/card/card";
+import Card from "@/components/card/card.vue";
 import DatePicker from "@/components/datePicker/datePicker";
 
 export default defineComponent({

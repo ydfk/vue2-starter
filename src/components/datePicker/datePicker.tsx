@@ -44,14 +44,7 @@ export default defineComponent({
 
     return () => (
       <div class="datePicker">
-        <a-date-picker
-          allowClear={false}
-          placeholder={props.placeholder}
-          format={props.format}
-          disabled={props.disabled}
-          vModel={selectValue}
-          on-change={change}
-        />
+        <h1>datePicker</h1>
       </div>
     );
   },
