@@ -6,7 +6,7 @@
  * Date : 2021-06-15 16:36:42
  */
 
-import { Modal } from "ant-design-vue";
+import { Modal, message } from "ant-design-vue";
 
 export const openDeleteModal = (
   onOk: () => void,
@@ -45,4 +45,24 @@ export const openInfoModal = (title: string, content: string, onOk?: () => void,
 
 export const openErrorModal = (title: string, content: string, onOk?: () => void, okText = "确认") => {
   Modal.error({ title, content, onOk, okText });
+};
+
+export const openSuccessMsg = (msg: string) => {
+  message.success(msg);
+};
+
+export const openWarningMsg = (msg: string) => {
+  message.warning(msg);
+};
+
+export const openWarnMsg = (msg: string) => {
+  message.warn(msg);
+};
+
+export const openErrorMsg = (msg: string) => {
+  message.error(msg);
+};
+
+export const openInfoMsg = (msg: string) => {
+  message.info(msg);
 };

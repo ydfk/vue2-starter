@@ -7,30 +7,32 @@
  */
 
 import { defineComponent, reactive, PropType, ref, watch } from "@vue/composition-api";
-import { DATE_FORMAT, DATE_FORMAT_NO_TIME } from "@/commons/constants";
+import { DATE_FORMAT_NO_TIME } from "@/commons/constants";
 import moment from "moment";
-import { formatDateTime } from "@/commons/method";
+import { datePickType } from "@/components/datePicker/datePickerType";
 
 export default defineComponent({
   props: {
-    placeholder: { type: String, default: "请选择时间" },
+    placeholder: { type: String, default: "请选择时间段" },
     format: { type: String, default: DATE_FORMAT_NO_TIME },
     disabled: { type: Boolean, default: false },
-    isNeedHour: { type: Boolean, default: true },
-    value: { type: Array as PropType<string[]> },
+    allowClear: { type: Boolean, default: false },
+    showTime: { type: Boolean, default: false },
+    value: { type: Array as PropType<datePickType[]> },
   },
   setup(props, { emit }) {
-    const selectValue = ref<(moment.Moment | null)[] | null>(null);
-
+    const state = reactive({
+      selectValue: ref<datePickType[] | null>(null),
+    });
     watch(
       () => props.value,
       (val) => {
         if (val) {
-          selectValue.value = [];
+          state.selectValue = [];
           if (val.length > 1) {
-            selectValue.value = [moment(val[0]), moment(val[1])];
+            state.selectValue = [moment(val[0]), moment(val[1])];
           } else if (val.length === 1) {
-            selectValue.value = [moment(val[0]), null];
+            state.selectValue = [moment(val[0]), null];
           }
         }
       },
@@ -40,31 +42,29 @@ export default defineComponent({
       }
     );
 
-    const change = (val: moment.Moment[]) => {
+    const emitChange = (val: datePickType[] | null) => {
+      emit("input", val);
+      emit("change", val);
+    };
+
+    const change = (val: datePickType[]) => {
       if (val && val.length > 0) {
-        if (props.isNeedHour) {
-          const dateStr = val.map((x) => formatDateTime(x.toDate(), DATE_FORMAT));
-          emit("change", dateStr);
-        } else {
-          const dateStr = val.map((x) => formatDateTime(x.toDate(), DATE_FORMAT_NO_TIME));
-          emit("change", dateStr);
-        }
+        emitChange(val);
       } else {
-        emit("change", null);
+        emitChange(null);
       }
     };
 
     return () => (
-      <div class="dateRangePicker">
-        <a-range-picker
-          allowClear={false}
-          placeholder={props.placeholder}
-          format={props.format}
-          disabled={props.disabled}
-          vModel={selectValue}
-          on-change={change}
-        />
-      </div>
+      <a-range-picker
+        allowClear={props.allowClear}
+        showTime={props.showTime}
+        //placeholder={props.placeholder}
+        format={props.format}
+        disabled={props.disabled}
+        vModel={state.selectValue}
+        vOn:change={change}
+      />
     );
   },
 });

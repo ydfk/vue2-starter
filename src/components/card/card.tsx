@@ -6,7 +6,7 @@
  * Date : 2021-06-15 15:46:59
  */
 
-import { defineComponent, reactive, toRefs } from "@vue/composition-api";
+import { defineComponent } from "@vue/composition-api";
 import "./card.sass";
 
 export default defineComponent({
@@ -34,18 +34,21 @@ export default defineComponent({
       },
     },
   },
-  setup(props) {
+  setup(props, { slots }) {
     return () => (
       <div class="card">
         <a-card
-          title={props.title}
+          title={slots.title || props.title}
+          extra={slots.extra}
           type="inner"
           bordered={props.bordered}
           hoverable={props.hoverable}
           loading={props.loading}
           headStyle={props.headStyle}
           bodyStyle={props.bodyStyle}
-        ></a-card>
+        >
+          {(slots.default && slots.default()) || []}
+        </a-card>
       </div>
     );
   },

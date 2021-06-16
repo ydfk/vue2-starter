@@ -16,7 +16,7 @@ module.exports = {
   },
   rules: {
     "no-console": process.env.NODE_ENV === "production" ? "error" : "off",
-    "no-debugger": "error",
+    "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",
     "@typescript-eslint/naming-convention": [
       "error",
       {
@@ -27,5 +27,6 @@ module.exports = {
     "@typescript-eslint/no-empty-function": "off",
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/no-use-before-define": "warn",
+    "@typescript-eslint/explicit-module-boundary-types": "off",
   },
 };

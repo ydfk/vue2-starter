@@ -40,15 +40,13 @@ import {
   Select,
   Statistic,
   Card,
+  Drawer,
 } from "ant-design-vue";
+import VueCompositionAPI from "@vue/composition-api";
 
-process.env.VUE_APP_MOCK && require("../mock/mock.js");
-
-moment.locale("zh-cn");
+Vue.use(VueCompositionAPI);
 
 Vue.use(VueBus);
-
-Vue.config.productionTip = false;
 
 Vue.use(Button);
 Vue.use(Col);
@@ -77,14 +75,19 @@ Vue.use(Popover);
 Vue.use(Select);
 Vue.use(Statistic);
 Vue.use(Card);
+Vue.use(Drawer);
+
+moment.locale("zh-cn");
+Vue.config.productionTip = false;
 
 Vue.prototype.$message = message;
-
 message.config({
   top: `50px`,
   duration: 1.5,
   maxCount: 1,
 });
+
+process.env.VUE_APP_MOCK && require("../mock/mock.js");
 
 new Vue({
   router,
