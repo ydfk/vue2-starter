@@ -25,14 +25,41 @@
       <a-col :span="12">
         <Card title="时间控件">
           <template #title><span style="color: darkblue">其他控件</span></template>
-          <a-button-group>
-            <a-button @click="showDialog = true" type="primary">点此打开弹窗</a-button>
-            <a-button @click="showDrawer = true" type="primary">点此打开抽屉</a-button>
-          </a-button-group>
+
+          <a-row>
+            <a-col :span="24">
+              <a-button-group>
+                <a-button @click="onOpenDialog" type="primary">点此打开弹窗</a-button>
+                <a-button @click="showDrawer = true" type="primary">点此打开抽屉</a-button>
+              </a-button-group></a-col
+            >
+          </a-row>
+          <a-row v-if="showFormDetail">
+            <a-col :span="4">转账内容：</a-col>
+            <a-col :span="20">{{ formModel }}</a-col>
+          </a-row>
         </Card>
       </a-col>
     </a-row>
-    <Dialog title="这是一个弹窗" :visible="showDialog" @ok="showDialog = false" @cancel="showDialog = false">这里是弹窗的内容</Dialog>
+    <Dialog title="这是一个弹窗" :visible="showDialog" @ok="onOk" @cancel="showDialog = false">
+      <a-form-model layout="horizontal" :rules="formRules" :ref="formRef" :model="formModel">
+        <a-form-model-item prop="text" label="转账人姓名" hasFeedback>
+          <a-input placeholder="转账人姓名" :maxLength="20" v-model="formModel.text" />
+        </a-form-model-item>
+        <a-form-model-item prop="amount" hasFeedback>
+          <span slot="label">
+            转账金额&nbsp;
+            <a-tooltip title="金额不能随便输入">
+              <a-icon type="question-circle-o" />
+            </a-tooltip>
+          </span>
+          <InputNumber placeholder="转账金额" v-model="formModel.amount" />
+        </a-form-model-item>
+        <a-form-model-item prop="type" label="转账方式" hasFeedback>
+          <Select multiple placeholder="请选择转账方式" v-model="formModel.type" :selectOption="typeData" />
+        </a-form-model-item>
+      </a-form-model>
+    </Dialog>
     <Drawer title="这是一个抽屉" :showDrawer="showDrawer" @close="showDrawer = false">这里是抽屉的内容</Drawer>
   </div>
 </template>

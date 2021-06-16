@@ -21,3 +21,8 @@ export interface ApiReturn<T = any> {
   msg: string;
   data?: T;
 }
+
+export interface ItemSourceModel {
+  value: string;
+  text: string;
+}

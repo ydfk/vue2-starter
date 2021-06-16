@@ -35,3 +35,8 @@ export enum RouterEnum {
   login = "login",
   example = "example",
 }
+
+export enum FormEnum {
+  login = "login",
+  demo = "demo",
+}

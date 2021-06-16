@@ -40,7 +40,25 @@ import {
   Select,
   Statistic,
   Card,
+  TreeSelect,
+  Cascader,
+  Checkbox,
+  Tabs,
+  Tree,
+  Slider,
+  Steps,
+  Timeline,
+  Progress,
+  Upload,
+  List,
+  Avatar,
   Drawer,
+  Empty,
+  Collapse,
+  Result,
+  Mentions,
+  Divider,
+  Popconfirm,
 } from "ant-design-vue";
 import VueCompositionAPI from "@vue/composition-api";
 
@@ -75,7 +93,25 @@ Vue.use(Popover);
 Vue.use(Select);
 Vue.use(Statistic);
 Vue.use(Card);
+Vue.use(TreeSelect);
+Vue.use(Cascader);
+Vue.use(Checkbox);
+Vue.use(Tabs);
+Vue.use(Tree);
+Vue.use(Slider);
+Vue.use(Steps);
+Vue.use(Timeline);
+Vue.use(Progress);
+Vue.use(Upload);
+Vue.use(List);
+Vue.use(Avatar);
 Vue.use(Drawer);
+Vue.use(Empty);
+Vue.use(Collapse);
+Vue.use(Result);
+Vue.use(Mentions);
+Vue.use(Divider);
+Vue.use(Popconfirm);
 
 moment.locale("zh-cn");
 Vue.config.productionTip = false;

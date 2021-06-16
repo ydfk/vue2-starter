@@ -51,3 +51,4 @@ export const INPUT_NUMBER_STEP = 0.01; // 步进
 export const FORM_LOGIN = "FORM_LOGIN";
 
 export const RULE_NO_SPACE = { pattern: REGEX_NO_SPACE, message: `禁止输入空格` };
+export const FORM_LAYOUT = "vertical";
