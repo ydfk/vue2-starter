@@ -9,34 +9,31 @@
 
 .table
   font-size: 12px !important
-
+  .table-header
+    margin-bottom: 10px
   .table-header-search-btn
     margin-left: 2px
-
   .table-header-right
     text-align: right
-
   .table-content
-    margin-top: 10px
-
     .ant-divider,
     .ant-divider-vertical
       margin: 0 4px
-
     ::v-deep a
       text-decoration: none
-
       &:visited
         text-decoration: none
-
       &:hover
         text-decoration: none
         opacity: 0.6
-
       &:active
         text-decoration: none
   .table-footer
     margin-top: 10px
+.wrapper
+  padding: 15px
+  background-color: white
+  border-radius: $border-radius
 .tableBtn
   padding: 0 !important
   margin: 0 !important
@@ -47,9 +44,13 @@
   color: red
 .stop
   color: red
+.disable
+  color: red
 .lock
   color: orange
 .unlock
+  color: green
+.enable
   color: green
 .edit
   color: $primary-color
