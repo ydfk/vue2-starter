@@ -16,7 +16,7 @@ import {
   TableFilterDescriptor,
   TablePageQuery,
 } from "./tableModel";
-import { TABLE_ACTION_KEY, TABLE_RECORD_KEY } from "./tableConst";
+import { TABLE_ACTION_KEY, TABLE_DESC_ORDER_KEY, TABLE_RECORD_KEY } from "./tableConst";
 import { TableAlignEnum, TableFilterOperatorEnum } from "./tableEnum";
 import moment from "moment";
 import axios from "@/apis/axios";
@@ -130,14 +130,14 @@ export const initColumnActions = (dataSources: Array<TableDataSource>, columns: 
 export const fetchDataSource = async (fetch: TableFetchDataSource, localData: BaseModel[]): Promise<PagedResult<TableDataSource>> => {
   const pageQuery = Object.assign(
     {
-      pageNum: fetch.PageCurrent,
-      pageSize: fetch.PageSize,
-      keyword: fetch.Keyword || "",
-      // AscOrderBy: fetch.AscOrderBy,
-      // DescOrderBy: fetch.DescOrderBy,
-      // Filters: getFilters(fetch.Columns, fetch.Keyword || "")
+      pageCurrent: fetch.pageCurrent,
+      pageSize: fetch.pageSize,
+      searchText: fetch.searchText || "",
+      ascOrderBy: fetch.ascOrderBy,
+      descOrderBy: fetch.descOrderBy,
+      filters: getFilters(fetch.columns, fetch.searchText || ""),
     },
-    fetch.QueryParams
+    fetch.queryParams
   );
 
   let pagedData: PagedResult<BaseModel> = {
@@ -145,19 +145,31 @@ export const fetchDataSource = async (fetch: TableFetchDataSource, localData: Ba
     pageResults: [],
   };
 
-  if ((localData && localData.length > 0) || !fetch.QueryApi) {
-    pagedData.totalCount = localData.length;
-
-    if (localData.length <= fetch.PageSize) {
-      pagedData.pageResults = localData;
-    } else {
-      pagedData.pageResults = localData.slice((fetch.PageCurrent - 1) * fetch.PageSize, fetch.PageSize * fetch.PageCurrent);
-    }
-  } else {
-    pagedData = await page(fetch.QueryApi, pageQuery);
+  if (fetch.queryListApi) {
+    localData = await axios.post(fetch.queryListApi, pageQuery);
   }
 
-  const dataSources = getDataSource(pagedData.pageResults, fetch.Columns, fetch.PageCurrent, fetch.PageSize, fetch.ActionFunc);
+  if ((!localData || localData.length == 0) && fetch.queryApi) {
+    pagedData = await page(fetch.queryApi, pageQuery);
+  } else {
+    //本地数据 前端模糊查询
+    if (fetch.searchText) {
+      localData = localData.filter((row) => {
+        return Object.keys(row).some((key) => {
+          return String(row[key]).toLowerCase().indexOf(fetch.searchText) > -1;
+        });
+      });
+    }
+
+    pagedData.totalCount = localData.length;
+
+    if (localData.length <= fetch.pageSize) {
+      pagedData.pageResults = localData;
+    } else {
+      pagedData.pageResults = localData.slice((fetch.pageCurrent - 1) * fetch.pageSize, fetch.pageSize * fetch.pageCurrent);
+    }
+  }
+  const dataSources = getDataSource(pagedData.pageResults, fetch.columns, fetch.pageCurrent, fetch.pageSize, fetch.actionFunc);
 
   return {
     totalCount: pagedData.totalCount,
@@ -170,12 +182,12 @@ export const tableExport = async (fetchArray: Array<TableFetchDataSource>, expor
 };
 
 const page = async (queryApi: string, pageQuery: TablePageQuery): Promise<PagedResult<BaseModel>> => {
-  //const noOrders = pageQuery.AscOrderBy == undefined && pageQuery.DescOrderBy == undefined;
-  //@ts-ignore
-  // const emptyOrders = !noOrders && pageQuery.AscOrderBy.length == 0 && pageQuery.DescOrderBy.length == 0;
-  // if (noOrders || emptyOrders) {
-  //   pageQuery.DescOrderBy = [TABLE_DESC_ORDER_KEY];
-  // }
+  const noOrders = pageQuery.ascOrderBy == undefined && pageQuery.descOrderBy == undefined;
+
+  const emptyOrders = !noOrders && pageQuery.ascOrderBy?.length == 0 && pageQuery.descOrderBy?.length == 0;
+  if (noOrders || emptyOrders) {
+    pageQuery.descOrderBy = [TABLE_DESC_ORDER_KEY];
+  }
 
   const result = await axios.post<PagedResult<any>>(queryApi, pageQuery);
   if (

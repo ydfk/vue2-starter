@@ -69,16 +69,17 @@ export interface TableChangeModel {
 
 // 刷新列表参数
 export interface TableFetchDataSource {
-  QueryApi: string; // 查询数据API
-  Columns: Array<TableColumn>;
-  PageCurrent: number;
-  PageSize: number;
-  Keyword: string;
-  QueryParams: Record<string, unknown>;
-  AscOrderBy: Array<string>; // 升序域
-  DescOrderBy: Array<string>; // 降序域
-  ActionFunc: (model: any) => Array<TableAction>;
-  SheetName?: string;
+  queryApi: string; // 查询数据API
+  queryListApi: string;
+  columns: Array<TableColumn>;
+  pageCurrent: number;
+  pageSize: number;
+  searchText: string;
+  queryParams: Record<string, unknown>;
+  ascOrderBy: Array<string>; // 升序域
+  descOrderBy: Array<string>; // 降序域
+  actionFunc: (model: any) => Array<TableAction>;
+  sheetName?: string;
 }
 
 export interface TableFilterDescriptor {
@@ -89,9 +90,9 @@ export interface TableFilterDescriptor {
 
 // 分页查询
 export interface TablePageQuery {
-  pageNum: number; // 查询页
+  pageCurrent: number; // 查询页
   pageSize: number; // 每页数量
-  keyword: string;
+  searchText: string;
   ascOrderBy?: Array<string>; // 升序域
   descOrderBy?: Array<string>; // 降序域
   filters?: Array<TableFilterDescriptor>;

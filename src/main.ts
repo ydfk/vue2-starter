@@ -59,6 +59,9 @@ import {
   Mentions,
   Divider,
   Popconfirm,
+  Table,
+  Transfer,
+  Pagination,
 } from "ant-design-vue";
 import VueCompositionAPI from "@vue/composition-api";
 
@@ -112,6 +115,9 @@ Vue.use(Result);
 Vue.use(Mentions);
 Vue.use(Divider);
 Vue.use(Popconfirm);
+Vue.use(Table);
+Vue.use(Transfer);
+Vue.use(Pagination);
 
 moment.locale("zh-cn");
 Vue.config.productionTip = false;

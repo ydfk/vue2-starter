@@ -30,12 +30,6 @@ export const DIALOG_MIN_WIDTH = 600;
 export const NO_LOGIN = "NO_LOGIN"; // 尚未登录系统
 export const NO_TOKEN = "NO_TOKEN"; // TOKEN过期
 
-export const TABLE_PAGE_SIZE = 10; // 默认每页数量
-export const TABLE_RECORD_KEY = "RecordKey";
-export const TABLE_ACTION_KEY = "actionKey";
-export const TABLE_DESC_ORDER_KEY = "UpdateAt";
-export const TABLE_TAGS_COUNT = 5;
-
 export const DATE_FORMAT = "YYYY-MM-DD HH:mm:ss";
 export const DATE_FORMAT_NO_SECOND = "YYYY-MM-DD HH:mm";
 export const DATE_FORMAT_NO_TIME = "YYYY-MM-DD";

@@ -41,6 +41,17 @@
         </Card>
       </a-col>
     </a-row>
+    <a-skeleton avatar active :loading="loading">
+      <Table
+        name="demo列表"
+        showExportBtn
+        :table-key="tableKey"
+        :columns="tableColumns"
+        :queryApi="tableQueryApi"
+        :actionFunc="setActions"
+        @action="onActions"
+      />
+    </a-skeleton>
     <Dialog title="这是一个弹窗" :visible="showDialog" @ok="onOk" @cancel="showDialog = false">
       <a-form-model layout="horizontal" :rules="formRules" :ref="formRef" :model="formModel">
         <a-form-model-item prop="text" label="转账人姓名" hasFeedback>
@@ -64,4 +75,4 @@
   </div>
 </template>
 
-<script lang="ts" src="./example.ts"></script>
+<script lang="ts" src="./example.tsx"></script>

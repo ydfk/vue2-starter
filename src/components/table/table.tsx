@@ -8,7 +8,7 @@
 
 import { computed, defineComponent, onMounted, PropType, reactive, ref } from "@vue/composition-api";
 import { TableKeyEnum, TableOrderEnum } from "./tableEnum";
-import { TableAction, TableColumn, TableDataSource, TablePagination, TableSorterModel } from "@/components/table/tableModel";
+import { TableAction, TableColumn, TableDataSource, TablePageQuery, TablePagination, TableSorterModel } from "@/components/table/tableModel";
 import { BaseModel } from "@/commons/models/baseModel";
 import { TABLE_ACTION_KEY, TABLE_PAGE_SIZE } from "@/components/table/tableConst";
 import useEnterKeyupEvent from "@/hooks/useEnterKeyupEvent";
@@ -16,6 +16,7 @@ import { fetchDataSource, initColumnActions, initColumns, tableExport } from "@/
 import useVueBus from "@/hooks/useVueBus";
 import { BusEnum } from "@/commons/enums";
 import { getPageStore, setPageStore } from "./pageStorage";
+import "./table.sass";
 
 export default defineComponent({
   props: {
@@ -27,12 +28,18 @@ export default defineComponent({
 
     queryApi: { default: "", type: String },
     queryListApi: { default: "", type: String }, //返回所有数据，前台实现分页
-    queryParams: { default: () => {}, type: Object as PropType<Record<string, any>> },
+    queryParams: {
+      default: () => {},
+      type: Object as PropType<Record<string, any>>,
+    },
     localData: { default: () => [], type: Array as PropType<BaseModel[]> }, //直接使用数据，前台分页
 
     rowSelection: { default: null, type: Object as PropType<Record<string, any>> }, // 列表选择配置
     rememberPage: { default: true, type: Boolean }, // 记住页码
-    scroll: { default: () => {}, type: Object as PropType<Record<string, any>> }, // 固定滚动
+    scroll: {
+      default: () => {},
+      type: Object as PropType<Record<string, any>>,
+    }, // 固定滚动
 
     showWrapper: { true: false, type: Boolean },
 
@@ -45,9 +52,12 @@ export default defineComponent({
     showSizeChanger: { default: false, type: Boolean },
     showPage: { default: true, type: Boolean },
     showRecord: { default: true, type: Boolean },
-    bordered: { default: false, type: Boolean },
+    bordered: { default: true, type: Boolean },
 
-    customRow: { default: () => {}, type: Function as PropType<(record: any, index: any) => void> },
+    customRow: {
+      default: () => {},
+      type: Function as PropType<(record: any, index: any) => void>,
+    },
     descOrderBy: { default: () => [], type: Array as PropType<string[]> },
     ascOrderBy: { default: () => [], type: Array as PropType<string[]> },
   },
@@ -79,18 +89,18 @@ export default defineComponent({
         }
       }),
       hasAction: computed(() => state.tableColumns.some((x) => x.key == TABLE_ACTION_KEY)),
-      fetchDataSource: computed(() => {
+      fetchDataSource: computed<TablePageQuery>(() => {
         return {
-          QueryApi: props.queryApi,
-          Columns: state.tableColumns,
-          PageCurrent: state.pagination.current,
-          PageSize: state.pagination.pageSize || state.maxPageSize,
-          Keyword: state.searchText.trim(),
-          QueryParams: props.queryParams,
-          AscOrderBy: state.tableAscOrder,
-          DescOrderBy: state.tableDescOrder,
-          ActionFunc: props.actionFunc,
-          SheetName: "",
+          queryApi: props.queryApi,
+          columns: state.tableColumns,
+          pageCurrent: state.pagination.current,
+          pageSize: state.pagination.pageSize || state.maxPageSize,
+          searchText: state.searchText.trim(),
+          queryParams: props.queryParams,
+          ascOrderBy: state.tableAscOrder,
+          descOrderBy: state.tableDescOrder,
+          actionFunc: props.actionFunc,
+          sheetName: "",
         };
       }),
     });
@@ -142,6 +152,7 @@ export default defineComponent({
 
       state.loading = true;
       const pagedResult = await fetchDataSource(state.fetchDataSource, props.localData);
+
       //// 设置排序 受控属性 来修改排序箭头样式
       props.columns.forEach((s) => {
         const key = s.sortKey != undefined ? s.sortKey : s.key;
@@ -289,7 +300,7 @@ export default defineComponent({
     const onPageChange = async (current: number, pageSize: number) => {
       state.pagination.current = current;
       state.pagination.pageSize = pageSize;
-      setPageStore(state.tableKey.toString(), current);
+      setPageStore(props.tableKey.toString(), current);
       await refreshTable();
     };
 
@@ -387,6 +398,7 @@ export default defineComponent({
         />
       </div>
     );
+
     const tableFooter = () =>
       props.showPage && (
         <div class="table-footer">
@@ -403,12 +415,11 @@ export default defineComponent({
           />
         </div>
       );
-
     return () => (
       <div class={props.showWrapper ? "table wrapper" : "table"}>
-        {tableHeader}
-        {tableBody}
-        {tableFooter}
+        {tableHeader()}
+        {tableBody()}
+        {tableFooter()}
       </div>
     );
   },

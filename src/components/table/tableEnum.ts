@@ -19,16 +19,10 @@ export enum TableActionKeyEnum {
   EDIT = "edit",
   DETAIL = "detail",
   DELETE = "delete",
-  PREVIEW = "preview",
-  SELECT = "select",
   COPY = "copy",
   DISABLE = "disable",
   ENABLE = "enable",
-  QUOTE = "quote",
-  EDITROLE = "editRole",
   CREATE = "create",
-  ORDER = "order",
-  EVALUATION = "evaluation",
   DOWNLOAD = "download",
 }
 
