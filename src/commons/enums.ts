@@ -26,7 +26,7 @@ export enum ContentType {
 export enum BusEnum {
   formSubmit = "formSubmit",
   refreshTable = "refreshTable",
-  evaluationModelScore = "evaluationModelScore",
+  exportTable = "exportTable",
 }
 
 export enum RouterEnum {

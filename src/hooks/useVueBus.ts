@@ -9,7 +9,7 @@ import { BusEnum } from "@/commons/enums";
 import { onMounted, onBeforeUnmount } from "@vue/composition-api";
 import { VueBus } from "vue-bus";
 
-export default (bus: VueBus, busName: BusEnum, func: () => any) => {
+export default (bus: VueBus, busName: BusEnum, func: (...any) => any) => {
   onMounted(() => bus.on(busName, func));
   onBeforeUnmount(() => bus.off(busName, func));
 };

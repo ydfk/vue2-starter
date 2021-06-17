@@ -92,9 +92,9 @@ export interface TablePageQuery {
   pageNum: number; // 查询页
   pageSize: number; // 每页数量
   keyword: string;
-  // AscOrderBy?: Array<string>; // 升序域
-  // DescOrderBy?: Array<string>; // 降序域
-  // Filters?: Array<TableFilterDescriptor>;
+  ascOrderBy?: Array<string>; // 升序域
+  descOrderBy?: Array<string>; // 降序域
+  filters?: Array<TableFilterDescriptor>;
 }
 
 export interface TableExportModel {

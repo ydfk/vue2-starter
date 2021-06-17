@@ -6,302 +6,410 @@
  * Date : 2020-03-04 21:38:23
  */
 
-import { Vue, Component, Prop, Emit } from "vue-property-decorator";
+import { computed, defineComponent, onMounted, PropType, reactive, ref } from "@vue/composition-api";
 import { TableKeyEnum, TableOrderEnum } from "./tableEnum";
-import { TableAction, TableChangeModel, TableColumn, TableDataSource, TablePagination, TableSorterModel } from "./tableModel";
-import rowEvaluationResultList from "../../views/projectEvaluation/rowEvaluationResultList.vue";
-import { TABLE_ACTION_KEY, TABLE_PAGE_SIZE } from "./tableConst";
-import { initColumns, fetchDataSource as tableFetchDataSource, initColumnActions } from "@/components/table/tableService";
-import { setPageStore, getPageStore } from "./pageStorage";
+import { TableAction, TableColumn, TableDataSource, TablePagination, TableSorterModel } from "@/components/table/tableModel";
 import { BaseModel } from "@/commons/models/baseModel";
+import { TABLE_ACTION_KEY, TABLE_PAGE_SIZE } from "@/components/table/tableConst";
+import useEnterKeyupEvent from "@/hooks/useEnterKeyupEvent";
+import { fetchDataSource, initColumnActions, initColumns, tableExport } from "@/components/table/tableMethod";
+import useVueBus from "@/hooks/useVueBus";
 import { BusEnum } from "@/commons/enums";
+import { getPageStore, setPageStore } from "./pageStorage";
 
-@Component({
-  components: {
-    rowEvaluationResultList,
+export default defineComponent({
+  props: {
+    tableKey: { default: -1, type: Number as PropType<TableKeyEnum>, required: true },
+    name: { default: "", type: String },
+    searchTip: { default: "输入关键字查询", type: String },
+    columns: { default: () => [], type: Array as PropType<TableColumn[]> },
+    actionFunc: { default: null, type: Function as PropType<(model: any) => Array<TableAction>> },
+
+    queryApi: { default: "", type: String },
+    queryListApi: { default: "", type: String }, //返回所有数据，前台实现分页
+    queryParams: { default: () => {}, type: Object as PropType<Record<string, any>> },
+    localData: { default: () => [], type: Array as PropType<BaseModel[]> }, //直接使用数据，前台分页
+
+    rowSelection: { default: null, type: Object as PropType<Record<string, any>> }, // 列表选择配置
+    rememberPage: { default: true, type: Boolean }, // 记住页码
+    scroll: { default: () => {}, type: Object as PropType<Record<string, any>> }, // 固定滚动
+
+    showWrapper: { true: false, type: Boolean },
+
+    showExportBtn: { default: false, type: Boolean },
+    showSearch: { default: true, type: Boolean },
+    showHeader: { default: true, type: Boolean },
+    showTableHeader: { default: true, type: Boolean },
+
+    showQuickJumper: { default: false, type: Boolean },
+    showSizeChanger: { default: false, type: Boolean },
+    showPage: { default: true, type: Boolean },
+    showRecord: { default: true, type: Boolean },
+    bordered: { default: false, type: Boolean },
+
+    customRow: { default: () => {}, type: Function as PropType<(record: any, index: any) => void> },
+    descOrderBy: { default: () => [], type: Array as PropType<string[]> },
+    ascOrderBy: { default: () => [], type: Array as PropType<string[]> },
   },
-})
-export default class Table extends Vue {
-  @Prop({ default: -1, type: [Number, String], required: true }) readonly tableKey!: TableKeyEnum;
-  @Prop({ default: "", type: String }) readonly name!: string;
-  @Prop({ default: () => [], type: Array }) readonly columns!: Array<TableColumn>;
+  setup(props, { emit, slots, root }) {
+    const state = reactive({
+      searchText: "",
+      loading: false,
+      exportLoading: false,
 
-  @Prop({ default: "", type: String }) readonly queryApi!: string;
-  @Prop({ default: () => ({}) }) readonly queryParams!: Record<string, unknown> | string[];
-  @Prop({ default: () => ({}), type: Function }) readonly customRow!: (record: any, index: any) => void;
+      tableAscOrder: ref<string[]>([]),
+      tableDescOrder: ref<string[]>([]),
+      selectedRowKeys: ref<string[]>([]),
 
-  @Prop({ default: () => [], type: Array }) readonly descOrderBy!: Array<string>;
-  @Prop({ default: () => [], type: Array }) readonly ascOrderBy!: Array<string>;
-  @Prop({ default: null, type: Function }) readonly actionFunc!: (model: any) => Array<TableAction>;
+      tableColumns: ref<TableColumn[]>([]),
+      dataSource: ref<TableDataSource[]>([]),
 
-  @Prop({ default: false, type: Boolean }) readonly showExportBtn!: boolean; //显示导出
-  @Prop({ default: true, type: Boolean }) readonly showSearch!: boolean; // 显示查询
-  @Prop({ default: true, type: Boolean }) readonly showHeader!: boolean; // 显示表头
+      pagination: reactive<TablePagination>({
+        current: 1,
+        pageSize: TABLE_PAGE_SIZE,
+        pageSizeOptions: ["10", "20", "30", "40", "50"],
+        total: 0,
+      }),
 
-  @Prop({ default: false, type: Boolean }) readonly showQuickJumper!: boolean;
-  @Prop({ default: false, type: Boolean }) readonly showSizeChanger!: boolean;
-  @Prop({ default: true, type: Boolean }) readonly showPage!: boolean; // 显示分页
-
-  @Prop({ default: true, type: Boolean }) readonly showRecord!: boolean; // 显示序号
-
-  @Prop({ default: "输入关键字查询", type: String }) readonly searchTip!: string;
-
-  @Prop({ default: () => [], type: Array }) readonly localData!: BaseModel[];
-
-  @Prop({ default: true, type: Boolean }) readonly bordered!: boolean;
-
-  @Prop({ default: true, type: Boolean }) readonly showWrapper!: boolean;
-
-  @Prop({ default: true, type: Boolean }) readonly showTableHeader!: boolean;
-
-  @Prop({ default: () => ({}), type: Object }) readonly scroll!: Record<string, unknown>;
-
-  @Prop({ default: null, type: Object }) readonly rowSelection!: Record<string, unknown>; // 列表选择配置
-
-  keyword = "";
-  loading = false;
-  exportLoading = false;
-
-  tableAscOrder: string[] = [];
-  tableDescOrder: string[] = [];
-  selectedRowKeys: string[] = [];
-
-  pagination: TablePagination = new (class implements TablePagination {
-    current = 1;
-    pageSize = TABLE_PAGE_SIZE;
-    pageSizeOptions = ["10", "20", "30", "40", "50"];
-    total = 0;
-  })();
-
-  tableColumns: Array<TableColumn> = [];
-  dataSource: Array<TableDataSource> = [];
-  enterSearch = (e: KeyboardEvent) => {
-    if (e.keyCode === 13) {
-      this.onSearch();
-    }
-  };
-
-  get maxPageSize(): number {
-    if (!this.showPage) {
-      return 999999999;
-    } else {
-      return TABLE_PAGE_SIZE;
-    }
-  }
-
-  get hasAction(): boolean {
-    return this.tableColumns.some((x) => x.key == TABLE_ACTION_KEY);
-  }
-
-  get fetchDataSource() {
-    return {
-      QueryApi: this.queryApi,
-      Columns: this.tableColumns,
-      PageCurrent: this.pagination.current,
-      PageSize: this.pagination.pageSize || this.maxPageSize,
-      Keyword: this.keyword.trim(),
-      QueryParams: this.queryParams,
-      AscOrderBy: this.tableAscOrder,
-      DescOrderBy: this.tableDescOrder,
-      ActionFunc: this.actionFunc,
-      SheetName: "",
-    };
-  }
-
-  async created() {
-    this.restOrder();
-    this.pagination.pageSize = this.maxPageSize;
-    this.tableColumns = initColumns(this.columns, this.showRecord);
-    await this.refreshTable();
-    this.$bus.on(BusEnum.refreshTable, this.emitTableRefresh);
-  }
-
-  mounted() {
-    window.addEventListener("keyup", this.enterSearch, false);
-  }
-
-  beforeDestroy() {
-    this.$bus.off(BusEnum.refreshTable, this.emitTableRefresh);
-    window.removeEventListener("keyup", this.enterSearch);
-  }
-
-  async onTableChange(pagination: TableDataSource, filters: any, sorter: TableSorterModel) {
-    if (sorter) {
-      this.tableAscOrder = [];
-      this.tableDescOrder = [];
-
-      const key = sorter.column && sorter.column.sortKey !== undefined ? sorter.column.sortKey : sorter.columnKey;
-
-      if (sorter.order === TableOrderEnum.ascend) {
-        this.tableAscOrder = [key];
-      } else if (sorter.order === TableOrderEnum.descend) {
-        this.tableDescOrder = [key];
-      }
-
-      await this.refreshTable();
-    }
-  }
-
-  async onPageChange(current: number, pageSize: number) {
-    this.pagination.current = current;
-    this.pagination.pageSize = pageSize;
-    setPageStore(this.tableKey.toString(), current);
-    await this.refreshTable();
-  }
-
-  async onPageSizeChange(current: number, pageSize: number) {
-    this.pagination.current = current;
-    this.pagination.pageSize = pageSize;
-    setPageStore(this.tableKey.toString(), this.pagination.current);
-    await this.refreshTable();
-  }
-
-  async onSearch() {
-    this.pagination.current = 1;
-    setPageStore(this.tableKey.toString(), this.pagination.current);
-    await this.refreshTable();
-  }
-
-  async onReset() {
-    this.keyword = "";
-    this.pagination.current = 1;
-    setPageStore(this.tableKey.toString(), this.pagination.current);
-    this.restOrder();
-    await this.refreshTable();
-  }
-
-  onActionClick(data: TableDataSource) {
-    this.onEmitAction(data);
-  }
-
-  async onExport() {
-    this.exportLoading = true;
-    //TODO 导出
-    this.change();
-    this.exportLoading = false;
-  }
-
-  async refreshTable() {
-    const page = getPageStore(this.tableKey.toString());
-    if (page) {
-      this.pagination.current = page;
-    }
-
-    this.loading = true;
-    const pagedResult = await tableFetchDataSource(this.fetchDataSource, this.localData);
-    //// 设置排序 受控属性 来修改排序箭头样式
-    this.columns.forEach((s) => {
-      const key = s.sortKey != undefined ? s.sortKey : s.key;
-
-      if (this.tableDescOrder?.includes(key)) {
-        s.sortOrder = TableOrderEnum.descend;
-      } else if (this.tableAscOrder?.includes(key)) {
-        s.sortOrder = TableOrderEnum.ascend;
-      } else {
-        s.sortOrder = false;
-      }
+      maxPageSize: computed(() => {
+        if (!props.showPage) {
+          return 999999999;
+        } else {
+          return TABLE_PAGE_SIZE;
+        }
+      }),
+      hasAction: computed(() => state.tableColumns.some((x) => x.key == TABLE_ACTION_KEY)),
+      fetchDataSource: computed(() => {
+        return {
+          QueryApi: props.queryApi,
+          Columns: state.tableColumns,
+          PageCurrent: state.pagination.current,
+          PageSize: state.pagination.pageSize || state.maxPageSize,
+          Keyword: state.searchText.trim(),
+          QueryParams: props.queryParams,
+          AscOrderBy: state.tableAscOrder,
+          DescOrderBy: state.tableDescOrder,
+          ActionFunc: props.actionFunc,
+          SheetName: "",
+        };
+      }),
     });
 
-    this.dataSource = pagedResult.pageResults;
-    this.pagination.total = pagedResult.totalCount;
+    /**
+     * 重置排序
+     */
+    const restOrder = () => {
+      state.tableAscOrder = props.ascOrderBy;
+      state.tableDescOrder = props.descOrderBy;
+    };
 
-    //// 设置操作列
-    this.tableColumns = initColumnActions(this.dataSource, this.tableColumns);
-
-    if (this.hasAction && this.tableColumns.length > 0) {
-      this.tableColumns.forEach((column) => {
-        if (column.key === TABLE_ACTION_KEY) {
-          column.customRender = (text, record: TableDataSource) => {
-            const actions = record.actions;
-            if (actions) {
-              if (actions.length <= 3) {
-                return actions.map((action, index) => {
-                  return this.getAction(action, record, actions.length > 1 && index !== actions.length - 1);
-                });
-              } else {
-                return (
-                  <span>
-                    {this.getAction(actions[0], record)}
-                    {this.getAction(actions[1], record)}
-                    <a-dropdown overlayClassName="tableAction">
-                      <a-menu slot="overlay">
-                        {record.moreActions?.map((action) => {
-                          return <a-menu-item>{this.getAction(action, record, false)}</a-menu-item>;
-                        })}
-                      </a-menu>
-                      <a>
-                        更多
-                        <a-icon type="down" />
-                      </a>
-                    </a-dropdown>
-                  </span>
-                );
-              }
-            } else {
-              return "";
+    /**
+     * 列表操作列
+     * @param action
+     * @param record
+     * @param showDivider
+     */
+    const getAction = (action: TableAction, record: TableDataSource, showDivider = true) => {
+      return (
+        <span>
+          <a-button
+            class={`tableBtn ${action.key}`}
+            type="link"
+            onClick={() =>
+              emit(
+                "action",
+                Object.assign(record, {
+                  actionKey: action.key,
+                })
+              )
             }
-          };
+          >
+            {action.title}
+          </a-button>
+          {showDivider ? <a-divider type="vertical" /> : ""}
+        </span>
+      );
+    };
+
+    /**
+     * 刷新列表
+     */
+    const refreshTable = async () => {
+      const page = getPageStore(props.tableKey.toString());
+      if (page) {
+        state.pagination.current = page;
+      }
+
+      state.loading = true;
+      const pagedResult = await fetchDataSource(state.fetchDataSource, props.localData);
+      //// 设置排序 受控属性 来修改排序箭头样式
+      props.columns.forEach((s) => {
+        const key = s.sortKey != undefined ? s.sortKey : s.key;
+
+        if (state.tableDescOrder?.includes(key)) {
+          s.sortOrder = TableOrderEnum.descend;
+        } else if (state.tableAscOrder?.includes(key)) {
+          s.sortOrder = TableOrderEnum.ascend;
+        } else {
+          s.sortOrder = false;
         }
       });
-    }
 
-    //// 触发 change 事件
-    this.change();
-    this.loading = false;
-    this.$emit("callback", pagedResult);
-  }
+      state.dataSource = pagedResult.pageResults;
+      state.pagination.total = pagedResult.totalCount;
 
-  getAction(action: TableAction, record: TableDataSource, showDivider = true) {
-    return (
-      <span>
-        <a-button
-          class={`tableBtn ${action.key}`}
-          type="link"
-          onClick={() =>
-            this.onActionClick(
-              Object.assign(record, {
-                actionKey: action.key,
-              })
-            )
+      //// 设置操作列
+      state.tableColumns = initColumnActions(state.dataSource, state.tableColumns);
+
+      if (state.hasAction && state.tableColumns.length > 0) {
+        state.tableColumns.forEach((column) => {
+          if (column.key === TABLE_ACTION_KEY) {
+            column.customRender = (text, record: TableDataSource) => {
+              const actions = record.actions;
+              if (actions) {
+                if (actions.length <= 3) {
+                  return actions.map((action, index) => {
+                    return getAction(action, record, actions.length > 1 && index !== actions.length - 1);
+                  });
+                } else {
+                  return (
+                    <span>
+                      {getAction(actions[0], record)}
+                      {getAction(actions[1], record)}
+                      <a-dropdown overlayClassName="tableAction">
+                        <a-menu slot="overlay">
+                          {record.moreActions?.map((action) => {
+                            return <a-menu-item>{getAction(action, record, false)}</a-menu-item>;
+                          })}
+                        </a-menu>
+                        <a>
+                          更多
+                          <a-icon type="down" />
+                        </a>
+                      </a-dropdown>
+                    </span>
+                  );
+                }
+              } else {
+                return "";
+              }
+            };
           }
-        >
-          {action.title}
-        </a-button>
-        {showDivider ? <a-divider type="vertical" /> : ""}
-      </span>
-    );
-  }
-
-  change() {
-    this.onChange({
-      key: this.tableKey,
-      column: this.tableColumns,
-      dataSource: this.dataSource,
-      pagination: this.pagination,
-    });
-  }
-
-  async emitTableRefresh(refreshKey: TableKeyEnum, refreshPage = 1) {
-    if (refreshKey === this.tableKey) {
-      const page = getPageStore(this.tableKey.toString());
-      if (page) {
-        refreshPage = page;
+        });
       }
 
-      this.pagination.current = refreshPage;
-      setPageStore(this.tableKey.toString(), this.pagination.current);
-      await this.refreshTable();
-    }
-  }
+      //// 触发 change 事件
+      emitChange();
+      state.loading = false;
+      emit("callback", pagedResult);
+    };
 
-  @Emit("action") onEmitAction(data: TableDataSource) {}
+    /**
+     * 相应列表刷新bus事件
+     * @param refreshKey 刷新的列表key
+     * @param refreshPage 刷新的页码默认1
+     */
+    const busTableRefresh = async (refreshKey: TableKeyEnum, refreshPage = 1) => {
+      if (refreshKey === props.tableKey) {
+        const page = getPageStore(props.tableKey.toString());
+        if (page) {
+          refreshPage = page;
+        }
+        state.pagination.current = refreshPage;
+        setPageStore(props.tableKey.toString(), state.pagination.current);
+        await refreshTable();
+      }
+    };
 
-  @Emit("add") onAdd() {}
+    /**
+     * 响应列表导出bus事件
+     * @param key 列表key
+     */
+    const busTableExport = async (key: TableKeyEnum) => {
+      if (key === props.tableKey) {
+        await onExport();
+      }
+    };
 
-  @Emit("change") onChange(tableChange: TableChangeModel) {}
+    /**
+     * 列表查询事件
+     */
+    const onSearch = async () => {
+      state.pagination.current = 1;
+      setPageStore(props.tableKey.toString(), state.pagination.current);
+      await refreshTable();
+    };
 
-  private restOrder() {
-    this.tableAscOrder = this.ascOrderBy;
-    this.tableDescOrder = this.descOrderBy;
-  }
-}
+    /**
+     * 重置列表事件
+     */
+    const onReset = async () => {
+      state.searchText = "";
+      state.pagination.current = 1;
+      setPageStore(props.tableKey.toString(), state.pagination.current);
+      restOrder();
+      await refreshTable();
+    };
+
+    /**
+     * 列表导出
+     */
+    const onExport = async () => {
+      state.exportLoading = true;
+      await tableExport([state.fetchDataSource], {
+        fileName: props.name,
+        total: state.pagination.total,
+      });
+      state.exportLoading = false;
+    };
+
+    /**
+     * 列表改变事件
+     */
+    const onTableChange = async (pagination: TableDataSource, filters: any, sorter: TableSorterModel) => {
+      if (sorter) {
+        state.tableAscOrder = [];
+        state.tableDescOrder = [];
+
+        const key = sorter.column && sorter.column.sortKey !== undefined ? sorter.column.sortKey : sorter.columnKey;
+
+        if (sorter.order === TableOrderEnum.ascend) {
+          state.tableAscOrder = [key];
+        } else if (sorter.order === TableOrderEnum.descend) {
+          state.tableDescOrder = [key];
+        }
+
+        await refreshTable();
+      }
+    };
+
+    /**
+     * 翻页事件
+     */
+    const onPageChange = async (current: number, pageSize: number) => {
+      state.pagination.current = current;
+      state.pagination.pageSize = pageSize;
+      setPageStore(state.tableKey.toString(), current);
+      await refreshTable();
+    };
+
+    /**
+     * 修改页码事件
+     * @param current
+     * @param pageSize
+     */
+    const onPageSizeChange = async (current: number, pageSize: number) => {
+      state.pagination.current = current;
+      state.pagination.pageSize = pageSize;
+      setPageStore(props.tableKey.toString(), state.pagination.current);
+      await refreshTable();
+    };
+
+    /**
+     * emit change事件
+     */
+    const emitChange = () => {
+      emit("change", {
+        key: props.tableKey,
+        column: state.tableColumns,
+        dataSource: state.dataSource,
+        pagination: state.pagination,
+      });
+    };
+
+    /**
+     * 注册回车事件
+     */
+    useEnterKeyupEvent(onSearch);
+    useVueBus(root.$bus, BusEnum.refreshTable, busTableRefresh);
+    useVueBus(root.$bus, BusEnum.exportTable, busTableExport);
+
+    ////生命周期
+    onMounted(async () => {
+      restOrder();
+      state.pagination.pageSize = state.maxPageSize;
+      state.tableColumns = initColumns(props.columns, props.showRecord, props.scroll);
+      await refreshTable();
+    });
+
+    const tableHeader = () =>
+      props.showHeader && (
+        <div class="table-header">
+          <a-row type="flex" justify="space-between">
+            <a-col span={15}>
+              {props.showSearch && (
+                <a-row>
+                  <a-col span={16}>
+                    <a-input id="searchText" placeholder={props.searchTip} vModel={state.searchText} />
+                  </a-col>
+                  <a-col span={8}>
+                    <a-button-group class="table-header-search-btn">
+                      <a-button type="primary" vOn:click={onSearch}>
+                        <a-icon type="search" />
+                        查询
+                      </a-button>
+                      <a-button vOn:click={onReset}>
+                        <a-icon type="undo" />
+                        重置
+                      </a-button>
+                    </a-button-group>
+                  </a-col>
+                </a-row>
+              )}
+            </a-col>
+            <a-col span={9} class="table-header-right">
+              {slots.headerRight ||
+                (props.showExportBtn && (
+                  <a-button type="primary" vOn:click={onExport} loading={state.exportLoading}>
+                    <a-icon type="export" />
+                    导出
+                  </a-button>
+                ))}
+            </a-col>
+          </a-row>
+        </div>
+      );
+
+    const tableBody = () => (
+      <div class={props.showHeader ? "table-content" : "table-content--noHeader"}>
+        <a-table
+          key={props.tableKey}
+          bordered={props.bordered}
+          loading={state.loading}
+          columns={state.tableColumns}
+          dataSource={state.dataSource}
+          pagination={false}
+          rowSelection={props.rowSelection}
+          customRow={props.customRow}
+          showHeader={props.showTableHeader}
+          scroll={props.scroll}
+          vOn:change={onTableChange}
+        />
+      </div>
+    );
+    const tableFooter = () =>
+      props.showPage && (
+        <div class="table-footer">
+          <a-pagination
+            showSizeChanger={props.showSizeChanger}
+            showQuickJumper={props.showQuickJumper}
+            pageSize={state.pagination.pageSize}
+            total={state.pagination.total}
+            pageSizeOptions={state.pagination.pageSizeOptions}
+            showTotal={(total) => `共 ${total} 条数据`}
+            current={state.pagination.current}
+            vOn:change={onPageChange}
+            vOn:showSizeChange={onPageSizeChange}
+          />
+        </div>
+      );
+
+    return () => (
+      <div class={props.showWrapper ? "table wrapper" : "table"}>
+        {tableHeader}
+        {tableBody}
+        {tableFooter}
+      </div>
+    );
+  },
+});

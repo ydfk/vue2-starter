@@ -1,22 +1,35 @@
 /*
  * Copyright (c) QJJS. All rights reserved.
  * ProjectName: Qinyin.Web
- * FileName : tableService.ts
+ * FileName : tableMethod.ts
  * Author : liyuhang
  * Date : 2020-03-04 21:53:15
  */
 
 import { BaseModel, PagedResult } from "@/commons/models/baseModel";
-import { TableAction, TableColumn, TableDataSource, TableFetchDataSource, TableFilterDescriptor, TablePageQuery } from "./tableModel";
+import {
+  TableAction,
+  TableColumn,
+  TableDataSource,
+  TableExportModel,
+  TableFetchDataSource,
+  TableFilterDescriptor,
+  TablePageQuery,
+} from "./tableModel";
 import { TABLE_ACTION_KEY, TABLE_RECORD_KEY } from "./tableConst";
 import { TableAlignEnum, TableFilterOperatorEnum } from "./tableEnum";
 import moment from "moment";
 import axios from "@/apis/axios";
 import numeral from "numeral";
 
-export const initColumns = (columns: Array<TableColumn>, showRecord: boolean): Array<TableColumn> => {
+export const initColumns = (columns: Array<TableColumn>, showRecord: boolean, tableScroll: Record<string, any>): Array<TableColumn> => {
   let columnsWithRecord: Array<TableColumn> = columns;
   if (showRecord) {
+    let recordFixed: string | boolean = false;
+    if (typeof tableScroll === "object" && JSON.stringify(tableScroll) !== "{}") {
+      recordFixed = "left";
+    }
+
     columnsWithRecord = [
       {
         key: TABLE_RECORD_KEY,
@@ -25,6 +38,7 @@ export const initColumns = (columns: Array<TableColumn>, showRecord: boolean): A
         align: TableAlignEnum.CENTER,
         filter: false,
         sorter: false,
+        fixed: recordFixed,
       },
       ...columns,
     ];
@@ -38,15 +52,13 @@ export const initColumns = (columns: Array<TableColumn>, showRecord: boolean): A
       c.dataIndex = c.key;
     }
 
-    // if (c.sorter == false) {
-    //   c.sorter = false;
-    // } else if (c.sortKey || c.sorter || c.filter !== false) {
-    //   c.sorter = true;
-    // } else {
-    //   c.sorter = false;
-    // }
-    c.sorter = false;
-    c.filter = false;
+    if (c.sorter == false) {
+      c.sorter = false;
+    } else if (c.sortKey || c.sorter || c.filter !== false) {
+      c.sorter = true;
+    } else {
+      c.sorter = false;
+    }
   });
   return columnsWithRecord;
 };
@@ -113,6 +125,48 @@ export const initColumnActions = (dataSources: Array<TableDataSource>, columns: 
   }
 
   return columns;
+};
+
+export const fetchDataSource = async (fetch: TableFetchDataSource, localData: BaseModel[]): Promise<PagedResult<TableDataSource>> => {
+  const pageQuery = Object.assign(
+    {
+      pageNum: fetch.PageCurrent,
+      pageSize: fetch.PageSize,
+      keyword: fetch.Keyword || "",
+      // AscOrderBy: fetch.AscOrderBy,
+      // DescOrderBy: fetch.DescOrderBy,
+      // Filters: getFilters(fetch.Columns, fetch.Keyword || "")
+    },
+    fetch.QueryParams
+  );
+
+  let pagedData: PagedResult<BaseModel> = {
+    totalCount: 0,
+    pageResults: [],
+  };
+
+  if ((localData && localData.length > 0) || !fetch.QueryApi) {
+    pagedData.totalCount = localData.length;
+
+    if (localData.length <= fetch.PageSize) {
+      pagedData.pageResults = localData;
+    } else {
+      pagedData.pageResults = localData.slice((fetch.PageCurrent - 1) * fetch.PageSize, fetch.PageSize * fetch.PageCurrent);
+    }
+  } else {
+    pagedData = await page(fetch.QueryApi, pageQuery);
+  }
+
+  const dataSources = getDataSource(pagedData.pageResults, fetch.Columns, fetch.PageCurrent, fetch.PageSize, fetch.ActionFunc);
+
+  return {
+    totalCount: pagedData.totalCount,
+    pageResults: dataSources,
+  };
+};
+
+export const tableExport = async (fetchArray: Array<TableFetchDataSource>, exportModel: TableExportModel): Promise<void> => {
+  //todo 导出待实现
 };
 
 const page = async (queryApi: string, pageQuery: TablePageQuery): Promise<PagedResult<BaseModel>> => {
@@ -202,44 +256,6 @@ const getDataSource = (
   }
 
   return dataSources;
-};
-
-export const fetchDataSource = async (fetch: TableFetchDataSource, localData: BaseModel[]): Promise<PagedResult<TableDataSource>> => {
-  const pageQuery = Object.assign(
-    {
-      pageNum: fetch.PageCurrent,
-      pageSize: fetch.PageSize,
-      keyword: fetch.Keyword || "",
-      // AscOrderBy: fetch.AscOrderBy,
-      // DescOrderBy: fetch.DescOrderBy,
-      // Filters: getFilters(fetch.Columns, fetch.Keyword || "")
-    },
-    fetch.QueryParams
-  );
-
-  let pagedData: PagedResult<BaseModel> = {
-    totalCount: 0,
-    pageResults: [],
-  };
-
-  if ((localData && localData.length > 0) || !fetch.QueryApi) {
-    pagedData.totalCount = localData.length;
-
-    if (localData.length <= fetch.PageSize) {
-      pagedData.pageResults = localData;
-    } else {
-      pagedData.pageResults = localData.slice((fetch.PageCurrent - 1) * fetch.PageSize, fetch.PageSize * fetch.PageCurrent);
-    }
-  } else {
-    pagedData = await page(fetch.QueryApi, pageQuery);
-  }
-
-  const dataSources = getDataSource(pagedData.pageResults, fetch.Columns, fetch.PageCurrent, fetch.PageSize, fetch.ActionFunc);
-
-  return {
-    totalCount: pagedData.totalCount,
-    pageResults: dataSources,
-  };
 };
 
 const getFilters = (columns: Array<TableColumn>, keyword: string) => {
