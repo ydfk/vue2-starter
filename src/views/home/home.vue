@@ -12,9 +12,7 @@
       <Header />
       <a-layout-content class="content">
         <div class="contentBox">
-          <transition name="fade">
-            <router-view />
-          </transition>
+          <router-view />
         </div>
       </a-layout-content>
       <Footer />

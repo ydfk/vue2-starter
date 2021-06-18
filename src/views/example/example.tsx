@@ -6,19 +6,19 @@
  * Date : 2021-06-15 16:48:51
  */
 
-import { defineComponent, reactive, ref, toRefs, computed, onMounted } from "@vue/composition-api";
+import { computed, defineComponent, onMounted, reactive, ref, toRefs } from "@vue/composition-api";
 import Card from "@/components/card/card";
 import DatePicker from "@/components/datePicker/datePicker";
 import DateRangePicker from "@/components/dateRangePicker/dateRangePicker";
-import { openConfirmModal, openSuccessMsg, openWarningMsg } from "@/components/dialog/dialogCommon";
+import { openSuccessMsg } from "@/components/dialog/dialogCommon";
 import moment from "moment";
-import { DATE_FORMAT, DATE_FORMAT_NO_TIME_ZH, FORM_LAYOUT } from "@/commons/constants";
+import { DATE_FORMAT, DATE_FORMAT_NO_TIME_ZH } from "@/commons/constants";
 import { datePickType } from "@/components/datePicker/datePickerType";
 import Dialog from "@/components/dialog/dialog";
 import Drawer from "@/components/drawer/drawer";
 import { getRequireRule } from "@/commons/validate";
 import useAntdFormModel from "@/hooks/useAntdFormModel";
-import { FormEnum } from "@/commons/enums";
+import { BusEnum, FormEnum } from "@/commons/enums";
 import InputNumber from "@/components/inputNumber/inputNumber";
 import Select from "@/components/select/select";
 import { ItemSourceModel } from "@/commons/models/baseModel";
@@ -26,6 +26,8 @@ import Table from "@/components/table/table";
 import { TableActionKeyEnum, TableKeyEnum } from "@/components/table/tableEnum";
 import { TableAction, TableColumn } from "@/components/table/tableModel";
 import { TABLE_ACTION_DELETE, TABLE_ACTION_DETAIL } from "@/components/table/tableConst";
+import useVueBus from "@/hooks/useVueBus";
+import Tag from "@/components/tag/tag";
 
 type demoFormModel = {
   text: string;
@@ -44,7 +46,7 @@ type demoTableModel = {
 };
 
 export default defineComponent({
-  components: { Card, DatePicker, DateRangePicker, Dialog, Drawer, InputNumber, Select, Table },
+  components: { Card, DatePicker, DateRangePicker, Dialog, Drawer, InputNumber, Select, Table, Tag },
   setup() {
     const state = reactive({
       loading: true,
@@ -110,7 +112,7 @@ export default defineComponent({
         {
           key: "email",
           title: "邮箱",
-          width: "10%",
+          width: "15%",
         },
         {
           key: "city",
@@ -122,11 +124,8 @@ export default defineComponent({
           title: "性别",
           width: "5%",
           customRender: (sex: string, record: demoTableModel) => {
-            if (sex === "男") {
-              return <span style="color:blue">{sex}</span>;
-            } else {
-              return <span style="color:orange">{sex}</span>;
-            }
+            //@ts-ignore
+            return <Tag color={sex == "男" ? "blue" : "pink"}>{sex}</Tag>;
           },
 
           sorter: false,
@@ -165,6 +164,8 @@ export default defineComponent({
       });
     };
 
+    const { emitBus } = useVueBus();
+
     return {
       ...toRefs(state),
       ...demoForm,
@@ -174,6 +175,7 @@ export default defineComponent({
       DATE_FORMAT,
       setActions,
       onActions,
+      onRefreshTable: () => emitBus(BusEnum.refreshTable, state.tableKey),
       onRestDatePicker: onRestDatePicker,
       onOk: onOk,
       onOpenDialog: () => {

@@ -13,7 +13,7 @@ import ComMixin from "@/mixins/comMixin";
 import { Action, Getter } from "vuex-class";
 import { A_USER_SIGNOUT, G_USER } from "@/store/store.types";
 import { UserModel } from "@/commons/models/loginModel";
-import Logo from "@/components/layout/logo/logo.vue";
+import Logo from "@/componentsBusiness/logo/logo";
 import { openConfirmModal } from "../dialog/dialogCommon";
 import { RouterEnum } from "@/commons/enums";
 

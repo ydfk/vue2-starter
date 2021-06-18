@@ -18,12 +18,12 @@
         <div class="box">
           <div class="center title">登录青音会议系统</div>
           <div class="center subtitle">开启一段不一样的工作之旅</div>
-          <a-form-model class="form" :rules="rules" :ref="formRef" :model="loginForm">
+          <a-form-model class="form" :rules="rules" :ref="formRef" :model="loginModel">
             <a-form-model-item prop="code">
-              <a-input placeholder="手机号" v-model="loginForm.code" />
+              <a-input placeholder="手机号" v-model="loginModel.code" />
             </a-form-model-item>
-            <a-form-model-item prop="password">
-              <a-input type="password" placeholder="密码" v-model="loginForm.password" />
+            <a-form-model-item prop="password" class="m-t-10">
+              <a-input type="password" placeholder="密码" v-model="loginModel.password" />
             </a-form-model-item>
           </a-form-model>
           <a-button type="primary" html-type="submit" class="loginBtn" :loading="loading" block @click.enter="onSubmit"> 登录 </a-button>

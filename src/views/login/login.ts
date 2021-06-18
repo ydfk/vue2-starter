@@ -6,90 +6,79 @@
  * Date : 2020-02-29 16:38:28
  */
 
-import { Component, Mixins } from "vue-property-decorator";
-import FormMixin from "@/mixins/formMixin";
-import { apiLogin } from "@/apis/loginApis";
-import ComMixin from "@/mixins/comMixin";
-import { Action, Getter } from "vuex-class";
-import { A_USER_SIGN, A_USER_SIGNOUT } from "@/store/store.types";
-import { TokenModel, UserModel } from "@/commons/models/loginModel";
-import Logo from "@/components/layout/logo/logo.vue";
-import Footer from "@/components/layout/footer.vue";
-import { FORM_LOGIN, INPUT_MAX_LENGTH_15, INPUT_MAX_LENGTH_30, REGEX_NO_SPACE, RULE_NO_SPACE } from "@/commons/constants";
+import { defineComponent, reactive, toRefs } from "@vue/composition-api";
+import Logo from "@/componentsBusiness/logo/logo";
+import Footer from "@/componentsBusiness/footer/footer";
 import { getMaxLengthRule, getRequireRule } from "@/commons/validate";
-import { RouterEnum } from "@/commons/enums";
+import { INPUT_MAX_LENGTH_15, INPUT_MAX_LENGTH_30, RULE_NO_SPACE } from "@/commons/constants";
+import useAntdFormModel from "@/hooks/useAntdFormModel";
+import { FormEnum, RouterEnum } from "@/commons/enums";
+import useEnterKeyupEvent from "@/hooks/useEnterKeyupEvent";
+import useRouter from "@/hooks/useRouter";
+import { apiLogin } from "@/apis/loginApis";
+import { openErrorMsg, openSuccessMsg } from "@/components/dialog/dialogCommon";
+import { A_USER_SIGN } from "@/store/store.types";
+import useVuex from "@/hooks/useVuex";
 
-@Component({
-  components: {
-    Logo,
-    Footer,
-  },
-})
-export default class Login extends Mixins(FormMixin, ComMixin) {
-  loading = false;
-  showRegistration = false;
-  showRetrievePassword = false;
+type loginFormType = {
+  code: string;
+  password: string;
+};
 
-  formRef = FORM_LOGIN;
-  loginForm = {
-    code: "",
-    password: "",
-  };
-
-  rules = {
-    code: [getRequireRule("请输入手机号"), getMaxLengthRule(INPUT_MAX_LENGTH_15), RULE_NO_SPACE],
-    password: [getRequireRule("请输入密码"), getMaxLengthRule(INPUT_MAX_LENGTH_30), RULE_NO_SPACE],
-  };
-
-  mounted() {
-    window.onkeyup = (e: KeyboardEvent) => {
-      if (e.keyCode === 13) {
-        this.onSubmit();
-      }
-    };
-    this.userSignOut();
-    this.hideLoading();
-  }
-
-  onSubmit() {
-    this.form(this.formRef).validate(async (valid) => {
-      if (valid) {
-        this.loading = true;
-        const apiReturn = await apiLogin(this.loginForm.code, this.loginForm.password);
-        this.loading = false;
-
-        if (apiReturn.result) {
-          await this.userSign(apiReturn.data);
-          this.$message.success("登录成功");
-          await this.$router.push({ name: RouterEnum.example });
-        } else {
-          this.$message.error(`登录失败！${apiReturn.msg}`);
-          this.form(this.formRef).resetFields();
-        }
-      }
+export default defineComponent({
+  components: { Logo, Footer },
+  setup() {
+    const state = reactive({
+      loading: false,
+      showRegistration: false,
+      showRetrievePassword: false,
+      rules: {
+        code: [getRequireRule("请输入手机号"), getMaxLengthRule(INPUT_MAX_LENGTH_15), RULE_NO_SPACE],
+        password: [getRequireRule("请输入密码"), getMaxLengthRule(INPUT_MAX_LENGTH_30), RULE_NO_SPACE],
+      },
+      loginModel: reactive<loginFormType>({
+        code: "",
+        password: "",
+      }),
     });
-  }
 
-  onForget() {
-    this.showRetrievePassword = true;
-  }
+    const { useAction } = useVuex();
 
-  onRegister() {
-    this.showRegistration = true;
-  }
+    const { pushName } = useRouter();
 
-  onRegisterCancel() {
-    this.showRegistration = false;
-  }
+    const loginForm = useAntdFormModel(FormEnum.login);
+    const onSubmit = () => {
+      loginForm.form().validate(async (valid) => {
+        if (valid) {
+          state.loading = true;
+          const apiReturn = await apiLogin(state.loginModel.code, state.loginModel.password);
+          state.loading = false;
 
-  onRetrievePasswordCancel() {
-    this.showRetrievePassword = false;
-  }
+          if (apiReturn.result) {
+            await useAction(A_USER_SIGN, apiReturn.data);
+            openSuccessMsg("登录成功");
+            //await router.push({ name: RouterEnum.example });
+            await pushName(RouterEnum.example);
+          } else {
+            openErrorMsg(`登录失败！${apiReturn.msg}`);
+            loginForm.form().resetFields();
+          }
+        }
+      });
+    };
 
-  onBackToHome() {
-    this.$router.push("/");
-  }
+    //注册回车事件
+    useEnterKeyupEvent(onSubmit);
 
-  @Action(A_USER_SIGNOUT) userSignOut!: () => void;
-  @Action(A_USER_SIGN) userSign!: (tokenModel: TokenModel | undefined) => void;
-}
+    return {
+      ...toRefs(state),
+      ...loginForm,
+      formRef: FormEnum.login,
+      onSubmit: onSubmit,
+      onForget: () => (state.showRetrievePassword = true),
+      onRetrievePasswordCancel: () => (state.showRegistration = false),
+      onRegister: () => (state.showRegistration = true),
+      onRegisterCancel: () => (state.showRegistration = false),
+    };
+  },
+});

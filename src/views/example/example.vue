@@ -42,15 +42,18 @@
       </a-col>
     </a-row>
     <a-skeleton avatar active :loading="loading">
-      <Table
-        name="demo列表"
-        showExportBtn
-        :table-key="tableKey"
-        :columns="tableColumns"
-        :queryApi="tableQueryApi"
-        :actionFunc="setActions"
-        @action="onActions"
-      />
+      <Card title="列表">
+        <template #extra><a-button @click="onRefreshTable">刷新列表</a-button></template>
+        <Table
+          name="demo列表"
+          showExportBtn
+          :table-key="tableKey"
+          :columns="tableColumns"
+          :queryApi="tableQueryApi"
+          :actionFunc="setActions"
+          @action="onActions"
+        />
+      </Card>
     </a-skeleton>
     <Dialog title="这是一个弹窗" :visible="showDialog" @ok="onOk" @cancel="showDialog = false">
       <a-form-model layout="horizontal" :rules="formRules" :ref="formRef" :model="formModel">

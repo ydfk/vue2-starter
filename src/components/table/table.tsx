@@ -152,7 +152,6 @@ export default defineComponent({
 
       state.loading = true;
       const pagedResult = await fetchDataSource(state.fetchDataSource, props.localData);
-
       //// 设置排序 受控属性 来修改排序箭头样式
       props.columns.forEach((s) => {
         const key = s.sortKey != undefined ? s.sortKey : s.key;
@@ -332,8 +331,11 @@ export default defineComponent({
      * 注册回车事件
      */
     useEnterKeyupEvent(onSearch);
-    useVueBus(root.$bus, BusEnum.refreshTable, busTableRefresh);
-    useVueBus(root.$bus, BusEnum.exportTable, busTableExport);
+
+    ////注册bus事件
+    const { registerBus } = useVueBus();
+    registerBus(BusEnum.refreshTable, busTableRefresh);
+    registerBus(BusEnum.exportTable, busTableExport);
 
     ////生命周期
     onMounted(async () => {

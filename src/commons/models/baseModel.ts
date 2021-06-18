@@ -22,6 +22,24 @@ export interface ApiReturn<T = any> {
   data?: T;
 }
 
+export interface RouterItemMetaModel {
+  title?: string;
+  icon?: string;
+  activeMenu?: string;
+  hidden?: boolean;
+
+  [key: string]: any;
+}
+
+export interface RouterItemModel {
+  name?: string;
+  component?: any;
+  path: string;
+  redirect?: string | Record<string, unknown>;
+  children?: RouterItemModel[];
+  meta?: RouterItemMetaModel;
+}
+
 export interface ItemSourceModel {
   value: string;
   text: string;
