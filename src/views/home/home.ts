@@ -6,14 +6,27 @@
  * Date : 2020-02-29 18:41:27
  */
 
-import { Component, Vue } from "vue-property-decorator";
 import Footer from "@/componentsBusiness/footer/footer";
-import Header from "@/components/layout/header.vue";
+import Header from "@/componentsBusiness/header/header";
+import Sider from "@/componentsBusiness/sider/sider";
+import { computed, defineComponent, reactive, toRefs } from "@vue/composition-api";
+import useVuex from "@/hooks/useVuex";
+import { G_MENU_SHOW_LEFT } from "@/store/store.types";
 
-@Component({
+export default defineComponent({
   components: {
     Footer,
     Header,
+    Sider,
   },
-})
-export default class Home extends Vue {}
+  setup() {
+    const { useGetter } = useVuex();
+    const state = reactive({
+      showSider: computed(() => useGetter(G_MENU_SHOW_LEFT)),
+    });
+
+    return {
+      ...toRefs(state),
+    };
+  },
+});

@@ -27,7 +27,9 @@ import { TableActionKeyEnum, TableKeyEnum } from "@/components/table/tableEnum";
 import { TableAction, TableColumn } from "@/components/table/tableModel";
 import { TABLE_ACTION_DELETE, TABLE_ACTION_DETAIL } from "@/components/table/tableConst";
 import useVueBus from "@/hooks/useVueBus";
+import useVuex from "@/hooks/useVuex";
 import Tag from "@/components/tag/tag";
+import { G_MENU_SHOW_TOP, M_SET_MENU_SHOW_LEFT, M_SET_MENU_SHOW_TOP } from "@/store/store.types";
 
 type demoFormModel = {
   text: string;
@@ -78,9 +80,11 @@ export default defineComponent({
       tableQueryApi: "demoTable",
       tableKey: TableKeyEnum.demo,
       tableColumns: ref<TableColumn[]>([]),
+      menuType: "top",
     });
 
     const demoForm = useAntdFormModel(FormEnum.demo);
+    const { useMutation, useGetter } = useVuex();
 
     const onRestDatePicker = () => {
       state.datePickerValue = moment();
@@ -93,6 +97,7 @@ export default defineComponent({
     );
 
     onMounted(() => {
+      state.menuType = useGetter(G_MENU_SHOW_TOP) ? "top" : "left";
       state.tableColumns = [
         {
           key: "name",
@@ -164,6 +169,14 @@ export default defineComponent({
       });
     };
 
+    const onMenuTypeChange = () => {
+      if (state.menuType == "top") {
+        useMutation(M_SET_MENU_SHOW_TOP);
+      } else {
+        useMutation(M_SET_MENU_SHOW_LEFT);
+      }
+    };
+
     const { emitBus } = useVueBus();
 
     return {
@@ -178,6 +191,7 @@ export default defineComponent({
       onRefreshTable: () => emitBus(BusEnum.refreshTable, state.tableKey),
       onRestDatePicker: onRestDatePicker,
       onOk: onOk,
+      onMenuTypeChange: onMenuTypeChange,
       onOpenDialog: () => {
         state.showDialog = true;
         state.showFormDetail = false;

@@ -10,11 +10,14 @@
   <div class="home">
     <a-layout>
       <Header />
-      <a-layout-content class="content">
-        <div class="contentBox">
-          <router-view />
-        </div>
-      </a-layout-content>
+      <a-layout>
+        <Sider v-if="showSider" />
+        <a-layout-content class="content">
+          <div class="contentBox">
+            <router-view />
+          </div>
+        </a-layout-content>
+      </a-layout>
       <Footer />
     </a-layout>
   </div>

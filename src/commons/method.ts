@@ -8,8 +8,10 @@
 
 import { DATE_FORMAT, DATE_FORMAT_NO_TIME } from "@/commons/constants";
 import moment from "moment";
+import { Route } from "vue-router";
+import { RouterItemMetaModel } from "@/commons/models/baseModel";
 
-export const routeToArray = (route: string): { routeArr: string[]; params: string } => {
+export const routeToArray = (route: string, meta?: RouterItemMetaModel): { routeArr: string[]; params: string } => {
   if (!route) {
     return {
       routeArr: [],
@@ -20,14 +22,17 @@ export const routeToArray = (route: string): { routeArr: string[]; params: strin
   const ret: string[] = [];
   let params = "";
   arr.shift();
-  arr.forEach((item) => {
+  arr.forEach((item, index) => {
     if (parseInt(item, 10)) {
       params = item;
       return;
     }
     ret.push(item);
-    // ret.push(index ? item : `/${item}`);
   });
+
+  if (meta && meta.activeMenu) {
+    ret.push(meta.activeMenu);
+  }
 
   return {
     routeArr: ret,
