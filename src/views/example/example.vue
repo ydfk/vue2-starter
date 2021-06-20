@@ -14,7 +14,7 @@
           <template #extra><a-button type="link" @click="onRestDatePicker">重置时间</a-button></template>
           <a-row>
             <a-col :span="12"><DatePicker v-model="datePickerValue" :format="DATE_FORMAT" :showTime="true" /></a-col>
-            <a-col :span="12">{{ showDatePickerValue }}</a-col>
+            <a-col :span="12">{{ showDatePickerValue }} </a-col>
           </a-row>
           <a-row class="m-t-30">
             <a-col :span="12"><DateRangePicker v-model="dateRangePickerValue" :format="DATE_FORMAT" :showTime="true" /></a-col>
