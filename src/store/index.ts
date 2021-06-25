@@ -15,6 +15,10 @@ import {
   M_SET_TOKEN,
   M_SET_USER,
   A_USER_REFRESH,
+  G_MENU_SHOW_TOP,
+  G_MENU_SHOW_LEFT,
+  M_SET_MENU_SHOW_TOP,
+  M_SET_MENU_SHOW_LEFT,
 } from "@/store/store.types";
 import persistedState from "vuex-persistedstate";
 import { TokenModel, UserModel } from "@/commons/models/loginModel";
@@ -29,6 +33,7 @@ interface AppState {
   user: UserModel;
   token: string;
   tokenExpire: string;
+  menuShowType: "top" | "left";
 }
 
 export default new Vuex.Store<AppState>({
@@ -42,12 +47,15 @@ export default new Vuex.Store<AppState>({
     },
     token: "",
     tokenExpire: "",
+    menuShowType: "top",
   },
   getters: {
     [G_LOADING]: (state: AppState) => state.loading,
     [G_USER_NAME]: (state: AppState) => state.user.name,
     [G_USER]: (state: AppState) => state.user,
     [G_TOKEN]: (state: AppState) => state.token,
+    [G_MENU_SHOW_TOP]: (state: AppState) => state.menuShowType == "top",
+    [G_MENU_SHOW_LEFT]: (state: AppState) => state.menuShowType == "left",
   },
   mutations: {
     [M_SET_LOADING]: (state: AppState, loading: boolean) => (state.loading = loading),
@@ -71,6 +79,8 @@ export default new Vuex.Store<AppState>({
         name: "",
       };
     },
+    [M_SET_MENU_SHOW_TOP]: (state: AppState) => (state.menuShowType = "top"),
+    [M_SET_MENU_SHOW_LEFT]: (state: AppState) => (state.menuShowType = "left"),
   },
   actions: {
     [A_LOADING]: ({ commit }) => commit(M_SET_LOADING, true),

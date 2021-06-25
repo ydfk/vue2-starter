@@ -22,6 +22,7 @@ export default function UseVuex() {
   return {
     store: state.store,
     useAction: (type: string, payload?: any) => state.store.dispatch(type, payload),
+    useMutation: (type: string, payload?: any) => state.store.commit(type, payload),
     useGetter: <T extends unknown>(type: string) => state.store.getters[type] as T,
   };
 }

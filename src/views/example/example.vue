@@ -25,14 +25,19 @@
       <a-col :span="12">
         <Card title="时间控件">
           <template #title><span style="color: darkblue">其他控件</span></template>
-
           <a-row>
-            <a-col :span="24">
+            <a-col :span="12">
               <a-button-group>
                 <a-button @click="onOpenDialog" type="primary">点此打开弹窗</a-button>
                 <a-button @click="showDrawer = true" type="primary">点此打开抽屉</a-button>
-              </a-button-group></a-col
-            >
+              </a-button-group>
+            </a-col>
+            <a-col :span="12" class="right">
+              <a-radio-group v-model="menuType" @change="onMenuTypeChange">
+                <a-radio :value="'top'">菜单顶部展示</a-radio>
+                <a-radio :value="'left'">菜单左边展示</a-radio>
+              </a-radio-group>
+            </a-col>
           </a-row>
           <a-row v-if="showFormDetail">
             <a-col :span="4">转账内容：</a-col>

@@ -10,11 +10,15 @@ export const G_LOADING = "G_LOADING"; //全局加载
 export const G_TOKEN = "G_TOKEN";
 export const G_USER = "G_USER";
 export const G_USER_NAME = "G_USER_NAME";
+export const G_MENU_SHOW_TOP = "G_MENU_SHOW_TOP";
+export const G_MENU_SHOW_LEFT = "G_MENU_SHOW_LEFT";
 
 export const M_SET_LOADING = "M_SET_LOADING"; //全局加载
 export const M_SET_TOKEN = "M_SET_TOKEN";
 export const M_SET_USER = "M_SET_USER";
 export const M_CLEAR_USER = "M_CLEAR_USER";
+export const M_SET_MENU_SHOW_TOP = "M_SET_MENU_SHOW_TOP";
+export const M_SET_MENU_SHOW_LEFT = "M_SET_MENU_SHOW_LEFT";
 
 export const A_LOADING = "A_LOADING"; // 打开全局加载
 export const A_LOADED = "A_LOADED"; // 全局加载完成

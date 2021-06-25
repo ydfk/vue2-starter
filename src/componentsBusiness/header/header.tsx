@@ -8,22 +8,24 @@
 
 import { computed, defineComponent, reactive } from "@vue/composition-api";
 import Logo from "@/componentsBusiness/logo/logo";
-import useVuex from "@/hooks/useVuex";
-import { A_USER_SIGNOUT, G_USER } from "@/store/store.types";
+import Menu from "@/componentsBusiness/menu/menu";
+import { A_USER_SIGNOUT, G_MENU_SHOW_TOP, G_USER } from "@/store/store.types";
 import { UserModel } from "@/commons/models/loginModel";
 import { openConfirmModal, openSuccessMsg } from "@/components/dialog/dialogCommon";
 import { RouterEnum } from "@/commons/enums";
 import useRouter from "@/hooks/useRouter";
+import useVuex from "@/hooks/useVuex";
 import "./header.sass";
 
 export default defineComponent({
-  components: { Logo },
+  components: { Logo, Menu },
   setup() {
     const { useGetter, useAction } = useVuex();
     const { router } = useRouter();
 
     const state = reactive({
       user: computed(() => useGetter<UserModel>(G_USER)),
+      showMenu: computed(() => useGetter(G_MENU_SHOW_TOP)),
     });
 
     const onUserNameMenuClick = (params: { item: any; key: string; keyPath: string[] }) => {
@@ -46,7 +48,7 @@ export default defineComponent({
           <a-col span={4}>
             <Logo />
           </a-col>
-          <a-col span={16}></a-col>
+          <a-col span={16}>{state.showMenu && <Menu />}</a-col>
           <a-col span={4} class="userName">
             <a-dropdown trigger={["click", "hover"]}>
               <span class="ant-dropdown-link">

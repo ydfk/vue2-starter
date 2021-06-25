@@ -7,16 +7,19 @@
  */
 
 import { defineComponent, reactive } from "@vue/composition-api";
+import Menu from "@/componentsBusiness/menu/menu";
 
 export default defineComponent({
+  components: { Menu },
   props: {
-    width: { type: [Number, String], default: 120 },
+    width: { type: [Number, String], default: 200 },
   },
   setup(props) {
-    const state = reactive({});
+    //@ts-ignore
+    const getMenu = () => <Menu mode={"vertical"} />;
     return () => (
       <div class="sider">
-        <a-layout-sider width={props.width}></a-layout-sider>
+        <a-layout-sider width={props.width}>{getMenu()}</a-layout-sider>
       </div>
     );
   },
