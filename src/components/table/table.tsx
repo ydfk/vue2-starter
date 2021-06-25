@@ -92,6 +92,7 @@ export default defineComponent({
       fetchDataSource: computed<TablePageQuery>(() => {
         return {
           queryApi: props.queryApi,
+          queryListApi: props.queryListApi,
           columns: state.tableColumns,
           pageCurrent: state.pagination.current,
           pageSize: state.pagination.pageSize || state.maxPageSize,
