@@ -62,12 +62,6 @@
 
 [webStorm](https://www.jetbrains.com/webstorm/download/#section=windows)
 
-[webstorm 学习版方式](https://github.com/Yinging/jetbrains-agent-latest)
-
-[webstorm 学习版](https://ldqk.org/1191)
-
-
-
 [visual Studio Code](https://code.visualstudio.com/download)
 
 ## 参考文档
