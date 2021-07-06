@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="ConsoleAnt" default="build" basedir=".">
+    <target name="replace">
+        <replaceregexp file="src/componentsBusiness/footer/footer.tsx" match="%BUILDNUMBER%" replace="${build.number}" />
+        <replaceregexp file="src/componentsBusiness/footer/footer.tsx" match="%REVISION%" replace="${build.vcs.number}" />
+    </target>
+    <target name="install" depends="replace">
+        <exec executable="cmd.exe" failonerror="true">
+            <arg value="/c yarn install" />
+        </exec>
+    </target>
+    <target name="lint" depends="install">
+        <exec executable="cmd.exe" failonerror="true">
+            <arg value="/c yarn lint" />
+        </exec>
+    </target>
+    <target name="build" depends="lint">
+        <exec executable="cmd.exe" failonerror="true">
+            <arg value="/c yarn build" />
+        </exec>
+    </target>
+</project>
