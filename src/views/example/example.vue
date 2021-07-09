@@ -39,6 +39,9 @@
               </a-radio-group>
             </a-col>
           </a-row>
+          <a-row>
+            <Upload :beforeUpload="beforeUpload" />
+          </a-row>
           <a-row v-if="showFormDetail">
             <a-col :span="4">转账内容：</a-col>
             <a-col :span="20">{{ formModel }}</a-col>

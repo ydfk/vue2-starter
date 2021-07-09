@@ -6,10 +6,11 @@
  * Date : 2021-06-16 21:53:21
  */
 
-import { defineComponent, reactive, computed } from "@vue/composition-api";
+import { defineComponent, reactive, computed, PropType } from "@vue/composition-api";
 import { openErrorMsg } from "@/components/dialog/dialogCommon";
 import { UploadFileModel, UploadRequestModel } from "@/commons/models/baseModel";
 import { v4 as uuidv4 } from "uuid";
+import { TableAction } from "@/components/table/tableModel";
 
 export default defineComponent({
   components: {},
@@ -20,6 +21,8 @@ export default defineComponent({
     everyUploadFileCount: { default: 5, type: Number }, // 多文件上传时候每次文件数量
     totalFileCount: { default: 20, type: Number }, // 总文件数量
     listType: { default: "picture-card", type: String }, // 按钮样式
+    showUploadList: { default: true, type: Boolean },
+    beforeUpload: { type: Function as PropType<(files: UploadFileModel[]) => Promise<void>> },
   },
   setup(props, ctx) {
     const state = reactive({
@@ -64,8 +67,22 @@ export default defineComponent({
                   openErrorMsg(`文件大小不能超过${props.singleFileSize}MB!`);
                   reject();
                 } else {
-                  ctx.emit("beforeUpload", [file]);
-                  resolve();
+                  if (!props.beforeUpload) {
+                    resolve();
+                  } else {
+                    const before = props.beforeUpload([file]);
+                    if (before && before.then) {
+                      before
+                        .then(() => {
+                          resolve();
+                        })
+                        .catch(() => {
+                          reject();
+                        });
+                    } else {
+                      resolve();
+                    }
+                  }
                 }
               }
             }
@@ -96,7 +113,7 @@ export default defineComponent({
             customRequest={customRequest}
             remove={remove}
             listType={props.listType}
-            showUploadList={false}
+            showUploadList={props.showUploadList}
           >
             {(state.slot && state.slot()) || (
               <div>

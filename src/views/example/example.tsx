@@ -10,7 +10,7 @@ import { computed, defineComponent, onMounted, reactive, ref, toRefs } from "@vu
 import Card from "@/components/card/card";
 import DatePicker from "@/components/datePicker/datePicker";
 import DateRangePicker from "@/components/dateRangePicker/dateRangePicker";
-import { openSuccessMsg } from "@/components/dialog/dialogCommon";
+import { openErrorMsg, openSuccessMsg } from "@/components/dialog/dialogCommon";
 import moment from "moment";
 import { DATE_FORMAT, DATE_FORMAT_NO_TIME_ZH } from "@/commons/constants";
 import { datePickType } from "@/components/datePicker/datePickerType";
@@ -21,7 +21,7 @@ import useAntdFormModel from "@/hooks/useAntdFormModel";
 import { BusEnum, FormEnum } from "@/commons/enums";
 import InputNumber from "@/components/inputNumber/inputNumber";
 import Select from "@/components/select/select";
-import { ItemSourceModel } from "@/commons/models/baseModel";
+import { ItemSourceModel, UploadFileModel } from "@/commons/models/baseModel";
 import Table from "@/components/table/table";
 import { TableActionKeyEnum, TableKeyEnum } from "@/components/table/tableEnum";
 import { TableAction, TableColumn } from "@/components/table/tableModel";
@@ -30,6 +30,7 @@ import useVueBus from "@/hooks/useVueBus";
 import useVuex from "@/hooks/useVuex";
 import Tag from "@/components/tag/tag";
 import { G_MENU_SHOW_TOP, M_SET_MENU_SHOW_LEFT, M_SET_MENU_SHOW_TOP } from "@/store/store.types";
+import Upload from "@/components/upload/upload";
 
 type demoFormModel = {
   text: string;
@@ -48,7 +49,7 @@ type demoTableModel = {
 };
 
 export default defineComponent({
-  components: { Card, DatePicker, DateRangePicker, Dialog, Drawer, InputNumber, Select, Table, Tag },
+  components: { Card, DatePicker, DateRangePicker, Dialog, Drawer, InputNumber, Select, Table, Tag, Upload },
   setup() {
     const state = reactive({
       loading: true,
@@ -195,6 +196,16 @@ export default defineComponent({
       onOpenDialog: () => {
         state.showDialog = true;
         state.showFormDetail = false;
+      },
+      beforeUpload: (files: UploadFileModel[]) => {
+        return new Promise<void>((resolve, reject) => {
+          if (files.some((x) => x.extension == ".pdf")) {
+            resolve();
+          } else {
+            openErrorMsg("只允许上传pdf");
+            reject();
+          }
+        });
       },
     };
   },
