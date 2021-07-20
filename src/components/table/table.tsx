@@ -35,7 +35,7 @@ export default defineComponent({
     localData: { default: () => [], type: Array as PropType<BaseModel[]> }, //直接使用数据，前台分页
 
     rowSelection: { default: null, type: Object as PropType<Record<string, any>> }, // 列表选择配置
-    rememberPage: { default: true, type: Boolean }, // 记住页码
+    rememberPage: { default: false, type: Boolean }, // 记住页码
     scroll: {
       default: () => {},
       type: Object as PropType<Record<string, any>>,
@@ -147,7 +147,7 @@ export default defineComponent({
      */
     const refreshTable = async () => {
       const page = getPageStore(props.tableKey.toString());
-      if (page) {
+      if (page && props.rememberPage) {
         state.pagination.current = page;
       }
 
@@ -223,7 +223,7 @@ export default defineComponent({
     const busTableRefresh = async (refreshKey: TableKeyEnum, refreshPage = 1) => {
       if (refreshKey === props.tableKey) {
         const page = getPageStore(props.tableKey.toString());
-        if (page) {
+        if (page && props.rememberPage) {
           refreshPage = page;
         }
         state.pagination.current = refreshPage;
