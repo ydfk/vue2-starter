@@ -1,14 +1,13 @@
 /*
- * Copyright (c) QJJS. All rights reserved.
- * ProjectName: bhikku.vue
- * FileName : dialog.tsx
- * Author : lyh67
- * Date : 2021-06-16 14:50:28
+ * @Description: Copyright (c) ydfk. All rights reserved
+ * @Author: ydfk
+ * @Date: 2021-06-16 14:50:28
+ * @LastEditors: ydfk
+ * @LastEditTime: 2021-07-28 16:26:22
  */
 
 import { DIALOG_MAX_HEIGHT, DIALOG_MAX_WIDTH } from "@/commons/constants";
 import { computed, defineComponent, onMounted, reactive } from "@vue/composition-api";
-import "./dialog.sass";
 
 export default defineComponent({
   props: {
@@ -28,6 +27,9 @@ export default defineComponent({
     maskTransitionName: { type: String, default: "fade" },
     getContainer: { type: Function },
     fixMaxHeight: { type: Boolean, default: true },
+    bodyStylePadding: { type: String, default: "10px 30px" },
+    bodyStyle: { type: Object },
+    dialogStyle: { type: Object },
   },
   setup(props, { slots, emit }) {
     const state = reactive({
@@ -36,19 +38,23 @@ export default defineComponent({
       maxHeight: computed(() => document.body.clientHeight - 200),
       maxWidth: computed(() => document.body.clientWidth - 100),
       bodyStyle: computed(() => {
-        if (props.height) {
-          return {
-            height: `${state.modalHeight}px`,
-            "max-height": `${props.fixMaxHeight ? state.maxHeight : state.modalHeight}px`,
-            overflow: "auto",
-            padding: "10px 15px",
-          };
+        if (props.bodyStyle) {
+          return props.bodyStyle;
         } else {
-          return { "max-height": `${state.maxHeight}px`, overflow: "auto", padding: "10px 15px" };
+          if (props.height) {
+            return {
+              height: `${state.modalHeight}px`,
+              "max-height": `${props.fixMaxHeight ? state.maxHeight : state.modalHeight}px`,
+              overflow: "auto",
+              padding: props.bodyStylePadding,
+            };
+          } else {
+            return { "max-height": `${state.maxHeight}px`, overflow: "auto", padding: props.bodyStylePadding };
+          }
         }
       }),
       dialogStyle: computed(() => {
-        return { top: "0px" };
+        return props.dialogStyle ? props.dialogStyle : { top: "0px" };
       }),
     });
 
