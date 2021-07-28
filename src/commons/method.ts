@@ -8,7 +8,6 @@
 
 import { DATE_FORMAT, DATE_FORMAT_NO_TIME } from "@/commons/constants";
 import moment from "moment";
-import { Route } from "vue-router";
 import { RouterItemMetaModel } from "@/commons/models/baseModel";
 
 export const routeToArray = (route: string, meta?: RouterItemMetaModel): { routeArr: string[]; params: string } => {
@@ -22,7 +21,7 @@ export const routeToArray = (route: string, meta?: RouterItemMetaModel): { route
   const ret: string[] = [];
   let params = "";
   arr.shift();
-  arr.forEach((item, index) => {
+  arr.forEach((item) => {
     if (parseInt(item, 10)) {
       params = item;
       return;
@@ -133,7 +132,7 @@ export const toThousands = (num: number, n = 2, symbol = ","): string => {
 
     let result = m == 0 ? num.toFixed(m) + "." : hasDot ? (n ? num.toFixed(n) : num) : num.toFixed(m);
 
-    result = result.toString().replace(/(\d)(?=(\d{3})+\.)/g, function (match, p1, p2) {
+    result = result.toString().replace(/(\d)(?=(\d{3})+\.)/g, function (match, p1) {
       return p1 + symbol;
     });
 

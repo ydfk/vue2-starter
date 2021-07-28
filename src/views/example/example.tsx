@@ -129,7 +129,7 @@ export default defineComponent({
           key: "sex",
           title: "性别",
           width: "5%",
-          customRender: (sex: string, record: demoTableModel) => {
+          customRender: (sex: string) => {
             //@ts-ignore
             return <Tag color={sex == "男" ? "blue" : "pink"}>{sex}</Tag>;
           },
@@ -147,7 +147,7 @@ export default defineComponent({
       state.loading = false;
     });
 
-    const setActions = (record: demoTableModel): TableAction[] => {
+    const setActions = (): TableAction[] => {
       return [TABLE_ACTION_DETAIL, TABLE_ACTION_DELETE];
     };
 

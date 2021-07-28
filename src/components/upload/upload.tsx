@@ -10,7 +10,6 @@ import { defineComponent, reactive, computed, PropType } from "@vue/composition-
 import { openErrorMsg } from "@/components/dialog/dialogCommon";
 import { UploadFileModel, UploadRequestModel } from "@/commons/models/baseModel";
 import { v4 as uuidv4 } from "uuid";
-import { TableAction } from "@/components/table/tableModel";
 
 export default defineComponent({
   components: {},

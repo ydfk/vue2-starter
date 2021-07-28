@@ -6,7 +6,7 @@
  * @LastEditTime: 2020-05-13 09:41:00
  -->
 <template>
-  <div id="app" v-cloak>
+  <div class="app" v-cloak>
     <a-config-provider :locale="locale">
       <a-spin class="globalSpin" size="large" :spinning="spinning">
         <transition name="fade">
@@ -22,7 +22,6 @@ import zhCnLocale from "@/commons/zhCNLocale";
 import { ConfigProvider, Spin } from "ant-design-vue";
 import { Action, Getter } from "vuex-class";
 import { A_LOADED, G_LOADING } from "@/store/store.types";
-import store from "@/store";
 
 Vue.use(Spin);
 Vue.use(ConfigProvider);
@@ -47,16 +46,16 @@ export default class App extends Vue {
 @import "assets/antFix"
 
 body
-  font-family: $fontFamily
   color: $primary-font-color
+  font-family: $fontFamily
 
-  #app
-    font-size: $primary-fontSize
+  .app
     height: 100%
+    font-size: $primary-fontSize
     background-color: $app-background-color
 
   ul
-    list-style: none
     margin: 0
     padding: 0
+    list-style: none
 </style>

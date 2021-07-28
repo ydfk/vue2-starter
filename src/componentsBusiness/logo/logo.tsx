@@ -14,7 +14,7 @@ import "./logo.sass";
 
 export default defineComponent({
   props: { canClick: { default: true, type: Boolean } },
-  setup(props, { root }) {
+  setup(props) {
     const onLogoClick = () => {
       if (props.canClick) {
         useRouter().pushName(RouterEnum.home);

@@ -1,0 +1,24 @@
+{
+  "recommendations": [
+    "aaron-bond.better-comments",
+    "ant-design-vue.vscode-ant-design-vue-helper",
+    "bierner.markdown-preview-github-styles",
+    "ChakrounAnas.turbo-console-log",
+    "christian-kohler.npm-intellisense",
+    "CoenraadS.bracket-pair-colorizer-2",
+    "DavidAnson.vscode-markdownlint",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "formulahendry.auto-close-tag",
+    "formulahendry.auto-rename-tag",
+    "johnstoncode.svn-scm",
+    "MS-CEINTL.vscode-language-pack-zh-hans",
+    "octref.vetur",
+    "streetsidesoftware.code-spell-checker",
+    "stylelint.vscode-stylelint",
+    "syler.sass-indented",
+    "unbug.codelf",
+    "vincaslt.highlight-matching-tag",
+    "wix.vscode-import-cost"
+  ]
+}

@@ -61,7 +61,7 @@ export default defineComponent({
     descOrderBy: { default: () => [], type: Array as PropType<string[]> },
     ascOrderBy: { default: () => [], type: Array as PropType<string[]> },
   },
-  setup(props, { emit, slots, root }) {
+  setup(props, { emit, slots }) {
     const state = reactive({
       searchText: "",
       loading: false,

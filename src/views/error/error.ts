@@ -6,9 +6,9 @@
  * Date : 2020-03-07 10:37:46
  */
 
-import { Vue, Component, Mixins } from "vue-property-decorator";
-import { A_LOADED, G_USER } from "@/store/store.types";
-import { Action, Getter } from "vuex-class";
+import { Component, Mixins } from "vue-property-decorator";
+import { G_USER } from "@/store/store.types";
+import { Getter } from "vuex-class";
 import { UserModel } from "@/commons/models/loginModel";
 import ComMixin from "@/mixins/comMixin";
 import errorSvg from "@/assets/images/500.svg";
