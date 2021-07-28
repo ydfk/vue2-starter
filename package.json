@@ -10,8 +10,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "prettier --write src && eslint --quiet --fix src --ext .ts,.js,.vue,.tsx,.jsx",
-    "lint:style": "stylelint src/**/*.{sass,vue,tsx}",
-    "stylelint-check": "stylelint-config-prettier-check"
+    "lint:style": "stylelint src/**/*.{sass,vue,tsx}"
   },
   "dependencies": {
     "@vue/composition-api": "^1.0.3",
@@ -63,7 +62,6 @@
     "stylelint": "^13.13.1",
     "stylelint-config-prettier": "^8.0.2",
     "stylelint-config-rational-order": "^0.1.2",
-    "stylelint-config-sass-guidelines": "^8.0.0",
     "stylelint-config-standard": "^22.0.0",
     "stylelint-declaration-block-no-ignored-properties": "^2.4.0",
     "stylelint-order": "^4.1.0",

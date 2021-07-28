@@ -14,7 +14,12 @@
             <arg value="/c yarn lint" />
         </exec>
     </target>
-    <target name="build" depends="lint">
+    <target name="lintstyle" depends="lint">
+        <exec executable="cmd.exe" failonerror="true">
+            <arg value="/c yarn lint:style" />
+        </exec>
+    </target>
+    <target name="build" depends="lintstyle">
         <exec executable="cmd.exe" failonerror="true">
             <arg value="/c yarn build" />
         </exec>
