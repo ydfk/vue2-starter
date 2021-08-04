@@ -207,6 +207,9 @@ export default defineComponent({
           }
         });
       },
+      onChangeTableQuery: () => {
+        state.tableQueryApi = `${state.tableQueryApi}?s=${new Date().getTime()}`;
+      },
     };
   },
 });

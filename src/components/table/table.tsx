@@ -6,7 +6,7 @@
  * Date : 2020-03-04 21:38:23
  */
 
-import { computed, defineComponent, onMounted, PropType, reactive, ref } from "@vue/composition-api";
+import { computed, defineComponent, onMounted, PropType, reactive, ref, watch } from "@vue/composition-api";
 import { TableKeyEnum, TableOrderEnum } from "./tableEnum";
 import { TableAction, TableColumn, TableDataSource, TablePageQuery, TablePagination, TableSorterModel } from "@/components/table/tableModel";
 import { BaseModel } from "@/commons/models/baseModel";
@@ -345,6 +345,24 @@ export default defineComponent({
       state.tableColumns = initColumns(props.columns, props.showRecord, props.scroll);
       await refreshTable();
     });
+
+    watch(
+      () => props.queryApi,
+      async (newVal, oldVal) => {
+        if (newVal != oldVal) {
+          await refreshTable();
+        }
+      }
+    );
+
+    watch(
+      () => props.queryListApi,
+      async (newVal, oldVal) => {
+        if (newVal != oldVal) {
+          await refreshTable();
+        }
+      }
+    );
 
     const tableHeader = () =>
       props.showHeader && (

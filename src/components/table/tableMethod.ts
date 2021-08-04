@@ -34,7 +34,7 @@ export const initColumns = (columns: Array<TableColumn>, showRecord: boolean, ta
       {
         key: TABLE_RECORD_KEY,
         title: "序号",
-        width: "60px",
+        width: 60,
         align: TableAlignEnum.CENTER,
         filter: false,
         sorter: false,
@@ -115,7 +115,7 @@ export const initColumnActions = (dataSources: Array<TableDataSource>, columns: 
         key: TABLE_ACTION_KEY,
         dataIndex: TABLE_ACTION_KEY,
         title: "操作",
-        width: `${actionColumnWidth}px`,
+        width: actionColumnWidth,
         align: TableAlignEnum.CENTER,
         filter: false,
         sorter: false,

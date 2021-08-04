@@ -1,4 +1,11 @@
 <!--
+ * @Description: Copyright (c) ydfk. All rights reserved
+ * @Author: ydfk
+ * @Date: 2021-06-15 18:12:15
+ * @LastEditors: ydfk
+ * @LastEditTime: 2021-08-03 13:58:57
+-->
+<!--
   - Copyright (c) QJJS. All rights reserved.
   - ProjectName: bhikku.vue
   - FileName : example.vue
@@ -52,6 +59,7 @@
     <a-skeleton avatar active :loading="loading">
       <Card title="列表">
         <template #extra><a-button @click="onRefreshTable">刷新列表</a-button></template>
+        <a-button @click="onChangeTableQuery" type="primary">修改列表查询</a-button>
         <Table
           name="demo列表"
           showExportBtn

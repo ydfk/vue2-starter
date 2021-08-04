@@ -3,7 +3,7 @@
  * @Author: ydfk
  * @Date: 2020-05-19 10:16:37
  * @LastEditors: ydfk
- * @LastEditTime: 2021-06-15 15:09:41
+ * @LastEditTime: 2021-08-04 13:55:28
  */
 module.exports = {
   root: true,
@@ -30,5 +30,11 @@ module.exports = {
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-unused-vars": "off",
+    "prettier/prettier": [
+      "error",
+      {
+        endOfLine: "auto",
+      },
+    ],
   },
 };
