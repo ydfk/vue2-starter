@@ -16,7 +16,7 @@ import {
   TableFilterDescriptor,
   TablePageQuery,
 } from "./tableModel";
-import { TABLE_ACTION_KEY, TABLE_DESC_ORDER_KEY, TABLE_RECORD_KEY } from "./tableConst";
+import { TABLE_ACTION_KEY, TABLE_DESC_ORDER_KEY, TABLE_RECORD_KEY, TABLE_RECORD_WIDTH } from "./tableConst";
 import { TableAlignEnum, TableFilterOperatorEnum } from "./tableEnum";
 import moment from "moment";
 import axios from "@/apis/axios";
@@ -25,16 +25,20 @@ import numeral from "numeral";
 export const initColumns = (columns: Array<TableColumn>, showRecord: boolean, tableScroll: Record<string, any>): Array<TableColumn> => {
   let columnsWithRecord: Array<TableColumn> = columns;
   if (showRecord) {
-    let recordFixed: string | boolean = false;
+    let recordFixed = false;
     if (typeof tableScroll === "object" && JSON.stringify(tableScroll) !== "{}") {
-      recordFixed = "left";
+      recordFixed = true;
+    }
+
+    if (columns.some((x) => x.fixed != undefined)) {
+      recordFixed = true;
     }
 
     columnsWithRecord = [
       {
         key: TABLE_RECORD_KEY,
         title: "序号",
-        width: 60,
+        width: TABLE_RECORD_WIDTH,
         align: TableAlignEnum.CENTER,
         filter: false,
         sorter: false,
@@ -52,7 +56,7 @@ export const initColumns = (columns: Array<TableColumn>, showRecord: boolean, ta
       c.dataIndex = c.key;
     }
 
-    if (c.sorter == false) {
+    if (c.sorter == false || c.sorter == undefined) {
       c.sorter = false;
     } else if (c.sortKey || c.sorter || c.filter !== false) {
       c.sorter = true;
@@ -60,11 +64,13 @@ export const initColumns = (columns: Array<TableColumn>, showRecord: boolean, ta
       c.sorter = false;
     }
   });
+
   return columnsWithRecord;
 };
 
-export const initColumnActions = (dataSources: Array<TableDataSource>, columns: Array<TableColumn>) => {
+export const initColumnActions = (dataSources: TableDataSource[], columns: TableColumn[], tableId: string) => {
   columns = columns.filter((x) => x.key != TABLE_ACTION_KEY);
+  let actionColumnWidth = 0;
 
   if (dataSources && columns) {
     let maxActionTitleLength = 0;
@@ -105,7 +111,7 @@ export const initColumnActions = (dataSources: Array<TableDataSource>, columns: 
       }
     });
     if (maxActionTitleLength > 0) {
-      let actionColumnWidth = maxActionTitleLength + 15;
+      actionColumnWidth = maxActionTitleLength + 15;
 
       if (actionColumnWidth > 200) {
         actionColumnWidth = 200;
@@ -123,6 +129,23 @@ export const initColumnActions = (dataSources: Array<TableDataSource>, columns: 
       });
     }
   }
+
+  //设置列表宽度
+  const offsetWidth = document.getElementById(tableId)?.offsetWidth || 0;
+  console.log("🚀 ~ file: tableMethod.ts ~ line 135 ~ initColumnActions ~ offsetWidth", offsetWidth);
+  const tableWidth = offsetWidth - TABLE_RECORD_WIDTH - actionColumnWidth;
+  console.log("🚀 ~ file: tableMethod.ts ~ line 135 ~ initColumnActions ~ tableWidth", tableWidth);
+
+  columns.forEach((c) => {
+    if (typeof c.width == "string") {
+      if (c.width?.includes("px")) {
+        c.width = +c.width.split("px")[0];
+      } else if (c.width?.includes("%")) {
+        const cwd = +c.width.split("%")[0];
+        c.width = (+cwd * tableWidth) / 100;
+      }
+    }
+  });
 
   return columns;
 };

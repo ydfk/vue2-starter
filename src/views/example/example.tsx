@@ -104,26 +104,31 @@ export default defineComponent({
           key: "name",
           title: "姓名",
           width: "20%",
+          resizable: true,
         },
         {
           key: "idNo",
           title: "身份证",
           width: "20%",
+          resizable: true,
         },
         {
           key: "mobile",
           title: "手机",
-          width: "20%",
+          width: "15%",
+          resizable: true,
         },
         {
           key: "email",
           title: "邮箱",
           width: "15%",
+          resizable: true,
         },
         {
           key: "city",
           title: "城市",
           width: "10%",
+          resizable: true,
         },
         {
           key: "sex",
@@ -133,15 +138,12 @@ export default defineComponent({
             //@ts-ignore
             return <Tag color={sex == "男" ? "blue" : "pink"}>{sex}</Tag>;
           },
-
-          sorter: false,
         },
         {
           key: "time",
           title: "出生日期",
           width: "10%",
           format: DATE_FORMAT_NO_TIME_ZH,
-          filter: false,
         },
       ];
       state.loading = false;

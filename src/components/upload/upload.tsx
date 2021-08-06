@@ -112,8 +112,7 @@ export default defineComponent({
             customRequest={customRequest}
             remove={remove}
             listType={props.listType}
-            showUploadList={props.showUploadList}
-          >
+            showUploadList={props.showUploadList}>
             {(state.slot && state.slot()) || (
               <div>
                 <a-icon class="uploadIcon" type="inbox" />

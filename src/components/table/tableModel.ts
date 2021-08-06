@@ -3,7 +3,7 @@
  * @Author: ydfk
  * @Date: 2021-04-22 10:15:59
  * @LastEditors: ydfk
- * @LastEditTime: 2021-04-22 10:16:44
+ * @LastEditTime: 2021-08-06 14:28:51
  */
 
 import { TableOrderEnum, TableAlignEnum, TableActionKeyEnum, TableKeyEnum, TableFilterOperatorEnum } from "./tableEnum";
@@ -37,6 +37,10 @@ export interface TableColumn {
 
   sortOrder?: TableOrderEnum | false; // 排序的受控属性
   sortKey?: string; // 特殊指定排序字段
+
+  fixed?: "left" | "right" | true | false;
+
+  resizable?: boolean;
 
   hidden?: boolean; //是否显示
   [key: string]: any;

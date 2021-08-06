@@ -26,8 +26,7 @@ export default defineComponent({
           color={props.color}
           onClose={() => {
             emit("close");
-          }}
-        >
+          }}>
           {(slots.default && slots.default()) || []}
         </a-tag>
       </span>

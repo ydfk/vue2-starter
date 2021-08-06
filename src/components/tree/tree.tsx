@@ -9,6 +9,7 @@
 import { TreeItemModel } from "@/commons/models/baseModel";
 import { defineComponent, onMounted, PropType, reactive, ref } from "@vue/composition-api";
 import { getTreeDeepFirstChild } from "@/components/tree/treeMethod";
+import { TreeNode } from "ant-design-vue/types/tree-node";
 
 export default defineComponent({
   props: {
@@ -23,6 +24,8 @@ export default defineComponent({
     },
     selectedKeys: { default: () => [], type: Array as PropType<string[]> },
     expandedKeys: { default: () => [], type: Array as PropType<string[]> },
+    checkable: { default: false, type: Boolean },
+    checkStrictly: { default: false, type: Boolean },
   },
   setup(props, { emit }) {
     const state = reactive({
@@ -55,8 +58,17 @@ export default defineComponent({
       emit("expend", { expanded: e.expanded, eventKey: e.node.eventKey, dataItem: e.node._props.dataRef }, expandedKeys);
     };
 
+    const onCheck = (
+      checkedKeys: string[],
+      e: { checked: boolean; node: { eventKey: string; _props: { dataRef: TreeItemModel } }; checkedNodes: TreeNode[]; event: Event }
+    ) => {
+      emit("check", checkedKeys, { checked: e.checked, eventKey: e.node.eventKey, dataItem: e.node._props.dataRef, checkedNodes: e.checkedNodes });
+    };
+
     return () => (
       <a-tree
+        checkable={props.checkable}
+        checkStrictly={props.checkStrictly}
         tree-data={props.treeData}
         replaceFields={props.replaceFields}
         defaultExpandAll={false}
@@ -64,8 +76,10 @@ export default defineComponent({
         showIcon={false}
         selectedKeys={state.treeSelectedKeys}
         defaultExpandedKeys={state.treeExpandedKeys}
+        defaultSelectedKeys={state.treeSelectedKeys}
         vOn:select={onSelect}
         vOn:expand={onExpand}
+        vOn:check={onCheck}
       />
     );
   },

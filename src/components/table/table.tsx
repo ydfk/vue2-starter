@@ -17,8 +17,10 @@ import useVueBus from "@/hooks/useVueBus";
 import { BusEnum } from "@/commons/enums";
 import { getPageStore, setPageStore } from "./pageStorage";
 import "./table.sass";
+import VueDraggableResizable from "vue-draggable-resizable";
 
 export default defineComponent({
+  components: { VueDraggableResizable },
   props: {
     tableKey: { default: -1, type: Number as PropType<TableKeyEnum>, required: true },
     name: { default: "", type: String },
@@ -60,11 +62,15 @@ export default defineComponent({
     },
     descOrderBy: { default: () => [], type: Array as PropType<string[]> },
     ascOrderBy: { default: () => [], type: Array as PropType<string[]> },
+
+    pageSize: { default: TABLE_PAGE_SIZE, type: Number },
   },
   setup(props, { emit, slots }) {
     const state = reactive({
+      loading: true,
+      tableId: computed(() => `table_${props.tableKey}_${new Date().getTime()}`),
       searchText: "",
-      loading: false,
+      tableLoading: false,
       exportLoading: false,
 
       tableAscOrder: ref<string[]>([]),
@@ -76,7 +82,7 @@ export default defineComponent({
 
       pagination: reactive<TablePagination>({
         current: 1,
-        pageSize: TABLE_PAGE_SIZE,
+        pageSize: props.pageSize,
         pageSizeOptions: ["10", "20", "30", "40", "50"],
         total: 0,
       }),
@@ -85,7 +91,7 @@ export default defineComponent({
         if (!props.showPage) {
           return 999999999;
         } else {
-          return TABLE_PAGE_SIZE;
+          return props.pageSize;
         }
       }),
       hasAction: computed(() => state.tableColumns.some((x) => x.key == TABLE_ACTION_KEY)),
@@ -104,6 +110,7 @@ export default defineComponent({
           sheetName: "",
         };
       }),
+      draggingState: reactive({}),
     });
 
     /**
@@ -133,8 +140,7 @@ export default defineComponent({
                   actionKey: action.key,
                 })
               )
-            }
-          >
+            }>
             {action.title}
           </a-button>
           {showDivider ? <a-divider type="vertical" /> : ""}
@@ -151,7 +157,7 @@ export default defineComponent({
         state.pagination.current = page;
       }
 
-      state.loading = true;
+      state.tableLoading = true;
       const pagedResult = await fetchDataSource(state.fetchDataSource, props.localData);
       //// 设置排序 受控属性 来修改排序箭头样式
       props.columns.forEach((s) => {
@@ -170,7 +176,7 @@ export default defineComponent({
       state.pagination.total = pagedResult.totalCount;
 
       //// 设置操作列
-      state.tableColumns = initColumnActions(state.dataSource, state.tableColumns);
+      state.tableColumns = initColumnActions(state.dataSource, state.tableColumns, state.tableId);
 
       if (state.hasAction && state.tableColumns.length > 0) {
         state.tableColumns.forEach((column) => {
@@ -211,7 +217,7 @@ export default defineComponent({
 
       //// 触发 change 事件
       emitChange();
-      state.loading = false;
+      state.tableLoading = false;
       emit("callback", pagedResult);
     };
 
@@ -340,10 +346,19 @@ export default defineComponent({
 
     ////生命周期
     onMounted(async () => {
+      state.loading = true;
       restOrder();
       state.pagination.pageSize = state.maxPageSize;
       state.tableColumns = initColumns(props.columns, props.showRecord, props.scroll);
       await refreshTable();
+
+      state.tableColumns.forEach((col: TableColumn) => {
+        if (typeof col.width == "number") {
+          state.draggingState[col.key] = col.width;
+        }
+      });
+
+      state.loading = false;
     });
 
     watch(
@@ -364,39 +379,86 @@ export default defineComponent({
       }
     );
 
+    const resizableTitle = (h, props, children) => {
+      let thDom = null;
+      const { key, ...restProps } = props;
+
+      const col = state.tableColumns.find((col) => {
+        const k = col.dataIndex || col.key;
+        return k === key;
+      });
+
+      if (!col.width || !col.resizable) {
+        return <th {...restProps}>{children}</th>;
+      }
+
+      const onDrag = (x: number) => {
+        state.draggingState[key] = 0;
+        col.width = Math.max(x, 1);
+      };
+
+      const onDragStop = () => {
+        //@ts-ignore
+        state.draggingState[key] = thDom.getBoundingClientRect().width;
+      };
+
+      return (
+        <th {...restProps} v-ant-ref={(r) => (thDom = r)} width={col.width} class="resize-table-th">
+          {children}
+          <VueDraggableResizable
+            key={col.key}
+            class="table-draggable-handle"
+            w={10}
+            x={state.draggingState[key] || col.width}
+            z={1}
+            axis="x"
+            draggable={true}
+            resizable={false}
+            onDragging={onDrag}
+            onDragstop={onDragStop}
+          />
+        </th>
+      );
+    };
+
     const tableHeader = () =>
       props.showHeader && (
         <div class="table-header">
           <a-row type="flex" justify="space-between">
-            <a-col span={15}>
-              {props.showSearch && (
-                <a-row>
-                  <a-col span={16}>
-                    <a-input id="searchText" placeholder={props.searchTip} vModel={state.searchText} />
-                  </a-col>
-                  <a-col span={8}>
-                    <a-button-group class="table-header-search-btn">
-                      <a-button type="primary" vOn:click={onSearch}>
-                        <a-icon type="search" />
-                        查询
-                      </a-button>
-                      <a-button vOn:click={onReset}>
-                        <a-icon type="undo" />
-                        重置
-                      </a-button>
-                    </a-button-group>
-                  </a-col>
-                </a-row>
-              )}
+            <a-col span={16}>
+              <a-space align={"end"}>
+                {slots.headerLeft && slots.headerLeft()}
+                {props.showSearch && (
+                  <a-row>
+                    <a-col span={16}>
+                      <a-input class="table-header-searchText" placeholder={props.searchTip} vModel={state.searchText} />
+                    </a-col>
+                    <a-col span={8}>
+                      <a-button-group class="table-header-search-btn">
+                        <a-button type="primary" vOn:click={onSearch}>
+                          <a-icon type="search" />
+                          查询
+                        </a-button>
+                        <a-button vOn:click={onReset}>
+                          <a-icon type="undo" />
+                          重置
+                        </a-button>
+                      </a-button-group>
+                    </a-col>
+                  </a-row>
+                )}
+              </a-space>
             </a-col>
-            <a-col span={9} class="table-header-right">
-              {slots.headerRight ||
-                (props.showExportBtn && (
+            <a-col span={8} class="table-header-right">
+              <a-space align={"end"}>
+                {slots.headerRight && slots.headerRight()}
+                {props.showExportBtn && (
                   <a-button type="primary" vOn:click={onExport} loading={state.exportLoading}>
                     <a-icon type="export" />
                     导出
                   </a-button>
-                ))}
+                )}
+              </a-space>
             </a-col>
           </a-row>
         </div>
@@ -407,13 +469,18 @@ export default defineComponent({
         <a-table
           key={props.tableKey}
           bordered={props.bordered}
-          loading={state.loading}
+          loading={state.tableLoading}
           columns={state.tableColumns}
           dataSource={state.dataSource}
           pagination={false}
           rowSelection={props.rowSelection}
           customRow={props.customRow}
           showHeader={props.showTableHeader}
+          components={{
+            header: {
+              cell: resizableTitle,
+            },
+          }}
           scroll={props.scroll}
           vOn:change={onTableChange}
         />
@@ -437,10 +504,12 @@ export default defineComponent({
         </div>
       );
     return () => (
-      <div class={props.showWrapper ? "table wrapper" : "table"}>
-        {tableHeader()}
-        {tableBody()}
-        {tableFooter()}
+      <div id={state.tableId} class={props.showWrapper ? "table wrapper" : "table"}>
+        <a-skeleton loading={state.loading} active avatar>
+          {tableHeader()}
+          {tableBody()}
+          {tableFooter()}
+        </a-skeleton>
       </div>
     );
   },

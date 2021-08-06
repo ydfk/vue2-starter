@@ -2,8 +2,7 @@
   "printWidth": 150,
   "tabWidth": 2,
   "useTabs": false,
-  "ignorePath": ".prettierignore",
-  "jsxBracketSameLine": false,
+  "jsxBracketSameLine": true,
   "overrides": [
     {
       "files": ".prettierrc",

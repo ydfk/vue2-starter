@@ -11,6 +11,8 @@
   font-size: 12px !important
   .table-header
     margin-bottom: 10px
+  .table-header-searchText
+    width: 336px
   .table-header-search-btn
     margin-left: 2px
   .table-header-right
@@ -54,3 +56,15 @@
   color: green
 .edit
   color: $primary-color
+
+.resize-table-th
+  position: relative
+  .table-draggable-handle
+    position: absolute
+    right: -5px
+    bottom: 0
+    left: auto !important
+    height: 100% !important
+    transform: none !important
+    cursor: col-resize
+    touch-action: none

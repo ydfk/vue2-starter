@@ -3,7 +3,7 @@
  * @Author: ydfk
  * @Date: 2021-06-15 18:12:15
  * @LastEditors: ydfk
- * @LastEditTime: 2021-08-03 13:58:57
+ * @LastEditTime: 2021-08-06 15:18:12
 -->
 <!--
   - Copyright (c) QJJS. All rights reserved.
@@ -57,19 +57,25 @@
       </a-col>
     </a-row>
     <a-skeleton avatar active :loading="loading">
-      <Card title="列表">
-        <template #extra><a-button @click="onRefreshTable">刷新列表</a-button></template>
-        <a-button @click="onChangeTableQuery" type="primary">修改列表查询</a-button>
-        <Table
-          name="demo列表"
-          showExportBtn
-          :table-key="tableKey"
-          :columns="tableColumns"
-          :queryApi="tableQueryApi"
-          :actionFunc="setActions"
-          @action="onActions"
-        />
-      </Card>
+      <a-row>
+        <a-col :span="24">
+          <Card title="列表">
+            <template #extra><a-button @click="onRefreshTable">刷新列表</a-button></template>
+            <Table
+              name="demo列表"
+              showExportBtn
+              :table-key="tableKey"
+              :columns="tableColumns"
+              :queryApi="tableQueryApi"
+              :actionFunc="setActions"
+              @action="onActions"
+            >
+              <template #headerLeft><a-button @click="onRefreshTable">刷新列表</a-button></template>
+              <template #headerRight><a-button @click="onChangeTableQuery" type="primary">修改列表查询</a-button></template>
+            </Table>
+          </Card>
+        </a-col>
+      </a-row>
     </a-skeleton>
     <Dialog title="这是一个弹窗" :visible="showDialog" @ok="onOk" @cancel="showDialog = false">
       <a-form-model layout="horizontal" :rules="formRules" :ref="formRef" :model="formModel">

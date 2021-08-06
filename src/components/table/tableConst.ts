@@ -2,8 +2,8 @@
  * @Description: Copyright (c) ydfk. All rights reserved
  * @Author: ydfk
  * @Date: 2021-04-22 10:11:58
- * @LastEditors: Wang Chen
- * @LastEditTime: 2021-06-01 14:25:07
+ * @LastEditors: ydfk
+ * @LastEditTime: 2021-08-06 14:42:44
  */
 
 import { TableActionKeyEnum } from "./tableEnum";
@@ -51,6 +51,7 @@ export const TABLE_ACTION_DOWNLOAD: TableAction = {
 
 export const TABLE_PAGE_SIZE = 10; // 默认每页数量
 export const TABLE_RECORD_KEY = "RecordKey";
+export const TABLE_RECORD_WIDTH = 60;
 export const TABLE_ACTION_KEY = "actionKey";
 export const TABLE_DESC_ORDER_KEY = "UpdateAt";
 export const TABLE_TAGS_COUNT = 5;

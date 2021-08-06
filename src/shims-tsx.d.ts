@@ -1,3 +1,4 @@
+/* eslint-disable */
 import Vue, { VNode } from "vue";
 
 declare global {
@@ -8,6 +9,10 @@ declare global {
     interface ElementClass extends Vue {}
     interface IntrinsicElements {
       [elem: string]: any;
+    }
+
+    interface ElementAttributesProperty {
+      $props: {};
     }
   }
 }

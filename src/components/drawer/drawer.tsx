@@ -64,8 +64,7 @@ export default defineComponent({
         maskClosable={props.maskClosable}
         after-visible-change={props.afterVisibleChange}
         keyboard={true}
-        vOn:close={onClose}
-      >
+        vOn:close={onClose}>
         {(slots.default && slots.default()) || []}
       </a-drawer>
     );

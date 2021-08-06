@@ -96,8 +96,7 @@ export default defineComponent({
         maskTransitionName={props.maskTransitionName}
         getContainer={props.getContainer}
         footer={footer}
-        vOn:cancel={onCancel}
-      >
+        vOn:cancel={onCancel}>
         {(slots.default && slots.default()) || []}
       </a-modal>
     );

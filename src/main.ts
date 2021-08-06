@@ -3,7 +3,7 @@
  * @Author: ydfk
  * @Date: 2020-05-13 09:25:27
  * @LastEditors: ydfk
- * @LastEditTime: 2021-06-15 21:28:33
+ * @LastEditTime: 2021-08-06 15:27:07
  */
 import Vue from "vue";
 import App from "./App.vue";
@@ -62,6 +62,7 @@ import {
   Table,
   Transfer,
   Pagination,
+  Space,
 } from "ant-design-vue";
 import VueCompositionAPI from "@vue/composition-api";
 
@@ -118,6 +119,7 @@ Vue.use(Popconfirm);
 Vue.use(Table);
 Vue.use(Transfer);
 Vue.use(Pagination);
+Vue.use(Space);
 
 moment.locale("zh-cn");
 Vue.config.productionTip = false;
