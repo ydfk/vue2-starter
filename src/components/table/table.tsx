@@ -43,7 +43,7 @@ export default defineComponent({
       type: Object as PropType<Record<string, any>>,
     }, // 固定滚动
 
-    showWrapper: { true: false, type: Boolean },
+    showWrapper: { default: false, type: Boolean },
 
     showExportBtn: { default: false, type: Boolean },
     showSearch: { default: true, type: Boolean },
