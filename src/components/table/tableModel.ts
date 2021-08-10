@@ -3,7 +3,7 @@
  * @Author: ydfk
  * @Date: 2021-04-22 10:15:59
  * @LastEditors: ydfk
- * @LastEditTime: 2021-08-06 14:28:51
+ * @LastEditTime: 2021-08-10 14:14:19
  */
 
 import { TableOrderEnum, TableAlignEnum, TableActionKeyEnum, TableKeyEnum, TableFilterOperatorEnum } from "./tableEnum";
@@ -25,10 +25,10 @@ export interface TableSorterModel {
 }
 
 export interface TableColumn {
-  key: string; //// 唯一确定column的属性
-  title: string | JSX.Element; //// 列的标题
-  width?: string | number; //// 宽度
-  align?: TableAlignEnum; //// 对齐方式
+  key: string; // 唯一确定column的属性
+  title: string | JSX.Element; // 列的标题
+  width?: string | number; // 宽度
+  align?: TableAlignEnum; // 对齐方式
   format?: string; /// 格式化
   formatFunc?: (data: any) => string | JSX.Element;
   filter?: boolean; /// 是否可筛选
@@ -40,7 +40,7 @@ export interface TableColumn {
 
   fixed?: "left" | "right" | true | false;
 
-  resizable?: boolean;
+  resizable?: boolean; // 是否列可拖动
 
   hidden?: boolean; //是否显示
   [key: string]: any;
@@ -105,4 +105,18 @@ export interface TablePageQuery {
 export interface TableExportModel {
   total: number;
   fileName?: string;
+}
+
+export interface TableQueryKeyModel {
+  pageCurrent: string; // 查询页
+  pageSize: string; // 每页数量
+  searchText: string;
+  ascOrderBy: string; // 升序域
+  descOrderBy: string; // 降序域
+  filters: string;
+}
+
+export interface TableResultKeyModel {
+  totalCount: string;
+  pageResults: string;
 }

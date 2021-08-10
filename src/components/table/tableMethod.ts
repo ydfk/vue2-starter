@@ -15,12 +15,17 @@ import {
   TableFetchDataSource,
   TableFilterDescriptor,
   TablePageQuery,
+  TableQueryKeyModel,
+  TableResultKeyModel,
 } from "./tableModel";
 import { TABLE_ACTION_KEY, TABLE_DESC_ORDER_KEY, TABLE_RECORD_KEY, TABLE_RECORD_WIDTH } from "./tableConst";
 import { TableAlignEnum, TableFilterOperatorEnum } from "./tableEnum";
 import moment from "moment";
 import axios from "@/apis/axios";
 import numeral from "numeral";
+import store from "@/store";
+import { A_LOADED, A_LOADING } from "@/store/store.types";
+import { ExportSheetModel, ExportToExcel } from "./export/exportToExcel";
 
 export const initColumns = (columns: Array<TableColumn>, showRecord: boolean, tableScroll: Record<string, any>): Array<TableColumn> => {
   let columnsWithRecord: Array<TableColumn> = columns;
@@ -150,15 +155,20 @@ export const initColumnActions = (dataSources: TableDataSource[], columns: Table
   return columns;
 };
 
-export const fetchDataSource = async (fetch: TableFetchDataSource, localData: BaseModel[]): Promise<PagedResult<TableDataSource>> => {
+export const fetchDataSource = async (
+  fetch: TableFetchDataSource,
+  localData: BaseModel[],
+  tableQueryKey: TableQueryKeyModel,
+  tableResultKey: TableResultKeyModel
+): Promise<PagedResult<TableDataSource>> => {
   const pageQuery = Object.assign(
     {
-      pageCurrent: fetch.pageCurrent,
-      pageSize: fetch.pageSize,
-      searchText: fetch.searchText || "",
-      ascOrderBy: fetch.ascOrderBy,
-      descOrderBy: fetch.descOrderBy,
-      filters: getFilters(fetch.columns, fetch.searchText || ""),
+      [tableQueryKey.pageCurrent]: fetch.pageCurrent,
+      [tableQueryKey.pageSize]: fetch.pageSize,
+      [tableQueryKey.searchText]: fetch.searchText || "",
+      [tableQueryKey.ascOrderBy]: fetch.ascOrderBy,
+      [tableQueryKey.descOrderBy]: fetch.descOrderBy,
+      [tableQueryKey.filters]: getFilters(fetch.columns, fetch.searchText || ""),
     },
     fetch.queryParams
   );
@@ -173,7 +183,7 @@ export const fetchDataSource = async (fetch: TableFetchDataSource, localData: Ba
   }
 
   if ((!localData || localData.length == 0) && fetch.queryApi) {
-    pagedData = await page(fetch.queryApi, pageQuery);
+    pagedData = await page(fetch.queryApi, pageQuery, tableQueryKey, tableResultKey);
   } else {
     //本地数据 前端模糊查询
     if (fetch.searchText) {
@@ -200,23 +210,104 @@ export const fetchDataSource = async (fetch: TableFetchDataSource, localData: Ba
   };
 };
 
-export const tableExport = async (fetchArray: Array<TableFetchDataSource>, exportModel: TableExportModel): Promise<void> => {
-  //todo 导出待实现
-};
+export const tableExport = async (
+  fetchArray: Array<TableFetchDataSource>,
+  exportModel: TableExportModel,
+  tableQueryKey: TableQueryKeyModel,
+  tableResultKey: TableResultKeyModel
+): Promise<void> => {
+  await store.dispatch(A_LOADING);
 
-const page = async (queryApi: string, pageQuery: TablePageQuery): Promise<PagedResult<BaseModel>> => {
-  const noOrders = pageQuery.ascOrderBy == undefined && pageQuery.descOrderBy == undefined;
+  const name = exportModel && exportModel.fileName;
+  const sheets: Array<ExportSheetModel> = [];
 
-  const emptyOrders = !noOrders && pageQuery.ascOrderBy?.length == 0 && pageQuery.descOrderBy?.length == 0;
-  if (noOrders || emptyOrders) {
-    pageQuery.descOrderBy = [TABLE_DESC_ORDER_KEY];
+  const promiseArray: any[] = [];
+
+  for (const fetch of fetchArray) {
+    let pageQuery = {
+      [tableQueryKey.pageCurrent]: 1,
+      [tableQueryKey.pageSize]: exportModel.total,
+      [tableQueryKey.searchText]: fetch.searchText || "",
+    };
+
+    if (fetch.queryParams) {
+      pageQuery = Object.assign(fetch.queryParams, pageQuery);
+    }
+
+    const allData = await page(fetch.queryApi, pageQuery, tableQueryKey, tableResultKey);
+
+    if (allData && allData.pageResults) {
+      import("./export/exportToExcel").then((excel) => {
+        const columns = fetch.columns;
+        const header: Array<string> = [];
+        const headerKey: Array<string> = [];
+        const exportData: Array<Array<any>> = [];
+        columns.forEach((c) => {
+          if (c.key != TABLE_ACTION_KEY && c.key != TABLE_RECORD_KEY) {
+            header.push(c.title as string);
+            headerKey.push(c.key);
+          }
+        });
+        allData.pageResults.forEach((d) => {
+          const data: Array<any> = [];
+          headerKey.forEach((k) => {
+            const value = d[k];
+            if (value && value.toString().indexOf("T") > 0) {
+              const date = moment(value);
+              if (date.isValid()) {
+                data.push(date.toDate());
+              } else {
+                data.push(value);
+              }
+            } else {
+              if (value.indexOf("0001-01-01") > -1 || value.indexOf("1970-01-01") > -1) {
+                data.push("");
+              } else {
+                data.push(value);
+              }
+            }
+          });
+          exportData.push(data);
+        });
+
+        sheets.push({ header: header, data: exportData, sheetName: fetch.sheetName || "sheet1" });
+      });
+    }
+
+    promiseArray.push(allData);
   }
 
-  const result = await axios.post<PagedResult<any>>(queryApi, pageQuery);
+  Promise.all(promiseArray).then(() => {
+    ExportToExcel({
+      fileName: name || "列表导出",
+      sheets: sheets,
+      autoWidth: true,
+    });
+  });
+
+  await store.dispatch(A_LOADED);
+};
+
+const page = async (
+  queryApi: string,
+  pageQuery: Record<string, unknown>,
+  tableQueryKey: TableQueryKeyModel,
+  tableResultKey: TableResultKeyModel
+): Promise<PagedResult<BaseModel>> => {
+  const noOrders = pageQuery[tableQueryKey.ascOrderBy] == undefined && pageQuery[tableQueryKey.descOrderBy] == undefined;
+
+  const emptyOrders =
+    !noOrders && (pageQuery[tableQueryKey.ascOrderBy] as []).length == 0 && (pageQuery[tableQueryKey.descOrderBy] as []).length == 0;
+  if (noOrders || emptyOrders) {
+    pageQuery[tableQueryKey.descOrderBy] = [TABLE_DESC_ORDER_KEY];
+  }
+
+  const result = await axios.post<any>(queryApi, pageQuery);
+
   if (
     typeof result === "object" &&
-    Object.prototype.hasOwnProperty.call(result, "totalCount") &&
-    Object.prototype.hasOwnProperty.call(result, "pageResults")
+    Object.prototype.hasOwnProperty.call(result, tableResultKey.totalCount) &&
+    Object.prototype.hasOwnProperty.call(result, tableResultKey.pageResults)
   ) {
     return result;
   } else if (Array.isArray(result)) {
@@ -226,8 +317,8 @@ const page = async (queryApi: string, pageQuery: TablePageQuery): Promise<PagedR
     };
   } else {
     return {
-      totalCount: result.totalCount,
-      pageResults: result.pageResults,
+      totalCount: result[tableResultKey.totalCount],
+      pageResults: result[tableResultKey.pageResults],
     };
   }
 };
@@ -293,16 +384,16 @@ const getDataSource = (
   return dataSources;
 };
 
-const getFilters = (columns: Array<TableColumn>, keyword: string) => {
+const getFilters = (columns: Array<TableColumn>, searchText: string) => {
   const filters: Array<TableFilterDescriptor> = [];
-  if (keyword) {
+  if (searchText) {
     columns
       .filter((c) => c.filter != false)
       .forEach((c) => {
         filters.push({
           member: c.key,
           operator: TableFilterOperatorEnum.Contains,
-          value: keyword,
+          value: searchText,
         });
       });
   }

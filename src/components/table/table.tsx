@@ -8,7 +8,16 @@
 
 import { computed, defineComponent, onMounted, PropType, reactive, ref, watch } from "@vue/composition-api";
 import { TableKeyEnum, TableOrderEnum } from "./tableEnum";
-import { TableAction, TableColumn, TableDataSource, TablePageQuery, TablePagination, TableSorterModel } from "@/components/table/tableModel";
+import {
+  TableAction,
+  TableColumn,
+  TableDataSource,
+  TablePageQuery,
+  TablePagination,
+  TableQueryKeyModel,
+  TableResultKeyModel,
+  TableSorterModel,
+} from "@/components/table/tableModel";
 import { BaseModel } from "@/commons/models/baseModel";
 import { TABLE_ACTION_KEY, TABLE_PAGE_SIZE } from "@/components/table/tableConst";
 import useEnterKeyupEvent from "@/hooks/useEnterKeyupEvent";
@@ -18,6 +27,20 @@ import { BusEnum } from "@/commons/enums";
 import { getPageStore, setPageStore } from "./pageStorage";
 import "./table.sass";
 import VueDraggableResizable from "vue-draggable-resizable";
+
+const tableQueryKeyDefault: TableQueryKeyModel = {
+  pageCurrent: "pageCurrent", // 查询页
+  pageSize: "pageSize", // 每页数量
+  searchText: "searchText",
+  ascOrderBy: "ascOrderBy", // 升序域
+  descOrderBy: "descOrderBy", // 降序域
+  filters: "filters",
+};
+
+const tableResultKeyModel: TableResultKeyModel = {
+  totalCount: "totalCount",
+  pageResults: "pageResults",
+};
 
 export default defineComponent({
   components: { VueDraggableResizable },
@@ -35,6 +58,16 @@ export default defineComponent({
       type: Object as PropType<Record<string, any>>,
     },
     localData: { default: () => [], type: Array as PropType<BaseModel[]> }, //直接使用数据，前台分页
+    pageSize: { default: TABLE_PAGE_SIZE, type: Number },
+
+    queryKey: {
+      default: () => tableQueryKeyDefault,
+      type: Object as PropType<TableQueryKeyModel>,
+    },
+    resultKey: {
+      default: () => tableResultKeyModel,
+      type: Object as PropType<TableResultKeyModel>,
+    },
 
     rowSelection: { default: null, type: Object as PropType<Record<string, any>> }, // 列表选择配置
     rememberPage: { default: false, type: Boolean }, // 记住页码
@@ -62,8 +95,6 @@ export default defineComponent({
     },
     descOrderBy: { default: () => [], type: Array as PropType<string[]> },
     ascOrderBy: { default: () => [], type: Array as PropType<string[]> },
-
-    pageSize: { default: TABLE_PAGE_SIZE, type: Number },
   },
   setup(props, { emit, slots }) {
     const state = reactive({
@@ -111,6 +142,8 @@ export default defineComponent({
         };
       }),
       draggingState: reactive({}),
+      tableQueryKey: computed(() => Object.assign(tableQueryKeyDefault, props.queryKey)),
+      tableResultKey: computed(() => Object.assign(tableQueryKeyDefault, props.resultKey)),
     });
 
     /**
@@ -158,8 +191,8 @@ export default defineComponent({
       }
 
       state.tableLoading = true;
-      const pagedResult = await fetchDataSource(state.fetchDataSource, props.localData);
-      //// 设置排序 受控属性 来修改排序箭头样式
+      const pagedResult = await fetchDataSource(state.fetchDataSource, props.localData, state.tableQueryKey, state.tableResultKey);
+      // 设置排序 受控属性 来修改排序箭头样式
       props.columns.forEach((s) => {
         const key = s.sortKey != undefined ? s.sortKey : s.key;
 
@@ -175,7 +208,7 @@ export default defineComponent({
       state.dataSource = pagedResult.pageResults;
       state.pagination.total = pagedResult.totalCount;
 
-      //// 设置操作列
+      // 设置操作列
       state.tableColumns = initColumnActions(state.dataSource, state.tableColumns, state.tableId);
 
       if (state.hasAction && state.tableColumns.length > 0) {
@@ -215,7 +248,7 @@ export default defineComponent({
         });
       }
 
-      //// 触发 change 事件
+      // 触发 change 事件
       emitChange();
       state.tableLoading = false;
       emit("callback", pagedResult);
@@ -273,10 +306,15 @@ export default defineComponent({
      */
     const onExport = async () => {
       state.exportLoading = true;
-      await tableExport([state.fetchDataSource], {
-        fileName: props.name,
-        total: state.pagination.total,
-      });
+      await tableExport(
+        [state.fetchDataSource],
+        {
+          fileName: props.name,
+          total: state.pagination.total,
+        },
+        state.tableQueryKey,
+        state.tableResultKey
+      );
       state.exportLoading = false;
     };
 
