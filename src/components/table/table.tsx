@@ -86,6 +86,15 @@ export default defineComponent({
     descOrderBy: { default: () => [], type: Array as PropType<string[]> },
     ascOrderBy: { default: () => [], type: Array as PropType<string[]> },
     resetFunc: { default: null, type: Function as PropType<() => Promise<void>> },
+    rowClassName: {
+      default: (record: any, index: any) => {
+        if (index % 2 === 1) {
+          return "dark-row";
+        }
+        return "";
+      },
+      type: Function as PropType<(record: any, index: any) => string>,
+    },
   },
   setup(props, { emit, slots }) {
     const state = reactive({
@@ -525,6 +534,7 @@ export default defineComponent({
             },
           }}
           scroll={props.scroll}
+          rowClassName={props.rowClassName}
           vOn:change={onTableChange}
         />
       </div>
