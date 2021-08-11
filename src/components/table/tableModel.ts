@@ -3,7 +3,7 @@
  * @Author: ydfk
  * @Date: 2021-04-22 10:15:59
  * @LastEditors: ydfk
- * @LastEditTime: 2021-08-10 14:14:19
+ * @LastEditTime: 2021-08-11 10:21:40
  */
 
 import { TableOrderEnum, TableAlignEnum, TableActionKeyEnum, TableKeyEnum, TableFilterOperatorEnum } from "./tableEnum";
@@ -120,3 +120,17 @@ export interface TableResultKeyModel {
   totalCount: string;
   pageResults: string;
 }
+
+export const TableQueryKeyDefault: TableQueryKeyModel = {
+  pageCurrent: "pageCurrent", // 查询页
+  pageSize: "pageSize", // 每页数量
+  searchText: "searchText",
+  ascOrderBy: "ascOrderBy", // 升序域
+  descOrderBy: "descOrderBy", // 降序域
+  filters: "filters",
+};
+
+export const TableResultKeyDefault: TableResultKeyModel = {
+  totalCount: "totalCount",
+  pageResults: "pageResults",
+};

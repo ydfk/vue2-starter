@@ -14,7 +14,9 @@ import {
   TableDataSource,
   TablePageQuery,
   TablePagination,
+  TableQueryKeyDefault,
   TableQueryKeyModel,
+  TableResultKeyDefault,
   TableResultKeyModel,
   TableSorterModel,
 } from "@/components/table/tableModel";
@@ -27,20 +29,6 @@ import { BusEnum } from "@/commons/enums";
 import { getPageStore, setPageStore } from "./pageStorage";
 import "./table.sass";
 import VueDraggableResizable from "vue-draggable-resizable";
-
-const tableQueryKeyDefault: TableQueryKeyModel = {
-  pageCurrent: "pageCurrent", // 查询页
-  pageSize: "pageSize", // 每页数量
-  searchText: "searchText",
-  ascOrderBy: "ascOrderBy", // 升序域
-  descOrderBy: "descOrderBy", // 降序域
-  filters: "filters",
-};
-
-const tableResultKeyModel: TableResultKeyModel = {
-  totalCount: "totalCount",
-  pageResults: "pageResults",
-};
 
 export default defineComponent({
   components: { VueDraggableResizable },
@@ -60,12 +48,14 @@ export default defineComponent({
     localData: { default: () => [], type: Array as PropType<BaseModel[]> }, //直接使用数据，前台分页
     pageSize: { default: TABLE_PAGE_SIZE, type: Number },
 
+    exportQuery: { default: null, type: Object as PropType<TablePageQuery> }, //导出查询
+
     queryKey: {
-      default: () => tableQueryKeyDefault,
+      default: () => TableQueryKeyDefault,
       type: Object as PropType<TableQueryKeyModel>,
     },
     resultKey: {
-      default: () => tableResultKeyModel,
+      default: () => TableResultKeyDefault,
       type: Object as PropType<TableResultKeyModel>,
     },
 
@@ -95,6 +85,7 @@ export default defineComponent({
     },
     descOrderBy: { default: () => [], type: Array as PropType<string[]> },
     ascOrderBy: { default: () => [], type: Array as PropType<string[]> },
+    resetFunc: { default: null, type: Function as PropType<() => Promise<void>> },
   },
   setup(props, { emit, slots }) {
     const state = reactive({
@@ -142,8 +133,8 @@ export default defineComponent({
         };
       }),
       draggingState: reactive({}),
-      tableQueryKey: computed(() => Object.assign(tableQueryKeyDefault, props.queryKey)),
-      tableResultKey: computed(() => Object.assign(tableQueryKeyDefault, props.resultKey)),
+      tableQueryKey: computed(() => Object.assign(TableQueryKeyDefault, props.queryKey)),
+      tableResultKey: computed(() => Object.assign(TableQueryKeyDefault, props.resultKey)),
     });
 
     /**
@@ -298,7 +289,15 @@ export default defineComponent({
       state.pagination.current = 1;
       setPageStore(props.tableKey.toString(), state.pagination.current);
       restOrder();
-      await refreshTable();
+
+      if (props.resetFunc && typeof props.resetFunc == "function") {
+        const reset = props.resetFunc();
+        if (reset && reset.then) {
+          reset.then(async () => await refreshTable());
+        }
+      } else {
+        await refreshTable();
+      }
     };
 
     /**
@@ -306,8 +305,13 @@ export default defineComponent({
      */
     const onExport = async () => {
       state.exportLoading = true;
+      let fetch = [state.fetchDataSource];
+      if (props.exportQuery) {
+        fetch = [props.exportQuery];
+      }
+
       await tableExport(
-        [state.fetchDataSource],
+        fetch,
         {
           fileName: props.name,
           total: state.pagination.total,
@@ -459,48 +463,49 @@ export default defineComponent({
       );
     };
 
-    const tableHeader = () =>
-      props.showHeader && (
-        <div class="table-header">
-          <a-row type="flex" justify="space-between">
-            <a-col span={16}>
-              <a-space align={"end"}>
-                {slots.headerLeft && slots.headerLeft()}
-                {props.showSearch && (
-                  <a-row>
-                    <a-col span={16}>
-                      <a-input class="table-header-searchText" placeholder={props.searchTip} vModel={state.searchText} />
-                    </a-col>
-                    <a-col span={8}>
-                      <a-button-group class="table-header-search-btn">
-                        <a-button type="primary" vOn:click={onSearch}>
+    const tableHeader = () => {
+      return (
+        props.showHeader && (
+          <div class="table-header">
+            <a-row type="flex" justify="space-between">
+              <a-col xl={18} xxl={16}>
+                <div class="table-header-left">
+                  {slots.headerLeft && slots.headerLeft()}
+                  {props.showSearch && (
+                    <div class="table-header-search">
+                      <a-input className="table-header-searchText" placeholder={props.searchTip} vModel={state.searchText} />
+                      <a-button-group className="table-header-search-btn">
+                        <a-button type="primary" on-click={onSearch}>
                           <a-icon type="search" />
                           查询
                         </a-button>
-                        <a-button vOn:click={onReset}>
+                        <a-button on-click={onReset}>
                           <a-icon type="undo" />
                           重置
                         </a-button>
                       </a-button-group>
-                    </a-col>
-                  </a-row>
-                )}
-              </a-space>
-            </a-col>
-            <a-col span={8} class="table-header-right">
-              <a-space align={"end"}>
-                {slots.headerRight && slots.headerRight()}
-                {props.showExportBtn && (
-                  <a-button type="primary" vOn:click={onExport} loading={state.exportLoading}>
-                    <a-icon type="export" />
-                    导出
-                  </a-button>
-                )}
-              </a-space>
-            </a-col>
-          </a-row>
-        </div>
+                    </div>
+                  )}
+                  {slots.headerSearchRight && slots.headerSearchRight()}
+                </div>
+              </a-col>
+              <a-col xl={6} xxl={8} class="table-header-right">
+                <div>
+                  {slots.headerRight && slots.headerRight()}
+                  {props.showExportBtn && (
+                    <a-button type="primary" on-click={onExport} loading={state.exportLoading}>
+                      <a-icon type="export" />
+                      导出
+                    </a-button>
+                  )}
+                </div>
+              </a-col>
+            </a-row>
+            {slots.headerNextLine && slots.headerNextLine()}
+          </div>
+        )
       );
+    };
 
     const tableBody = () => (
       <div class={props.showHeader ? "table-content" : "table-content--noHeader"}>

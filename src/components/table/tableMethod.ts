@@ -137,9 +137,7 @@ export const initColumnActions = (dataSources: TableDataSource[], columns: Table
 
   //设置列表宽度
   const offsetWidth = document.getElementById(tableId)?.offsetWidth || 0;
-  console.log("🚀 ~ file: tableMethod.ts ~ line 135 ~ initColumnActions ~ offsetWidth", offsetWidth);
   const tableWidth = offsetWidth - TABLE_RECORD_WIDTH - actionColumnWidth;
-  console.log("🚀 ~ file: tableMethod.ts ~ line 135 ~ initColumnActions ~ tableWidth", tableWidth);
 
   columns.forEach((c) => {
     if (typeof c.width == "string") {
@@ -184,6 +182,11 @@ export const fetchDataSource = async (
 
   if ((!localData || localData.length == 0) && fetch.queryApi) {
     pagedData = await page(fetch.queryApi, pageQuery, tableQueryKey, tableResultKey);
+
+    if (pagedData.totalCount > 0 && pagedData.pageResults.length == 0) {
+      pageQuery[tableQueryKey.pageCurrent] = pagedData.totalCount % (pageQuery[tableQueryKey.pageSize] as number);
+      pagedData = await page(fetch.queryApi, pageQuery, tableQueryKey, tableResultKey);
+    }
   } else {
     //本地数据 前端模糊查询
     if (fetch.searchText) {
@@ -202,7 +205,13 @@ export const fetchDataSource = async (
       pagedData.pageResults = localData.slice((fetch.pageCurrent - 1) * fetch.pageSize, fetch.pageSize * fetch.pageCurrent);
     }
   }
-  const dataSources = getDataSource(pagedData.pageResults, fetch.columns, fetch.pageCurrent, fetch.pageSize, fetch.actionFunc);
+  const dataSources = getDataSource(
+    pagedData.pageResults,
+    fetch.columns,
+    pageQuery[tableQueryKey.pageCurrent] as number,
+    fetch.pageSize,
+    fetch.actionFunc
+  );
 
   return {
     totalCount: pagedData.totalCount,
