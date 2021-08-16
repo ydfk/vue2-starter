@@ -105,6 +105,18 @@ export default defineComponent({
           title: "姓名",
           width: "20%",
           resizable: true,
+          // customRender: (name: string, record) => {
+          //   if (record.children) {
+          //     return (
+          //       <div>
+          //         <span>{name}</span>
+          //         <a-button>ddd</a-button>
+          //       </div>
+          //     );
+          //   } else {
+          //     return <span>{name}</span>;
+          //   }
+          // },
         },
         {
           key: "idNo",
@@ -135,7 +147,6 @@ export default defineComponent({
           title: "性别",
           width: "5%",
           customRender: (sex: string) => {
-            //@ts-ignore
             return <Tag color={sex == "男" ? "blue" : "pink"}>{sex}</Tag>;
           },
         },

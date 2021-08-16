@@ -35,6 +35,7 @@ export default defineComponent({
   components: { VueDraggableResizable },
   props: {
     tableKey: { default: -1, type: Number as PropType<TableKeyEnum>, required: true },
+    size: { default: "default", type: String }, //表格大小	default | middle | small
     name: { default: "", type: String },
     searchTip: { default: "输入关键字查询", type: String },
     columns: { default: () => [], type: Array as PropType<TableColumn[]> },
@@ -77,7 +78,7 @@ export default defineComponent({
     showQuickJumper: { default: false, type: Boolean },
     showSizeChanger: { default: false, type: Boolean },
     showPage: { default: true, type: Boolean },
-    showRecord: { default: true, type: Boolean },
+    showRecord: { default: true, type: Boolean }, //是否显示序号
     bordered: { default: true, type: Boolean },
 
     customRow: {
@@ -96,6 +97,15 @@ export default defineComponent({
       },
       type: Function as PropType<(record: any, index: any) => string>,
     },
+
+    childrenColumnName: { default: "children", type: String }, //指定树形结构的列名
+    defaultExpandAllRows: { default: false, type: Boolean }, //初始时，是否展开所有行
+    defaultExpandedRowKeys: { default: null, type: Array as PropType<string[]> }, //默认展开的行
+    expandedRowKeys: { default: null, type: Array as PropType<string[]> }, //展开的行，控制属性
+    expandRowByClick: { default: false, type: Boolean }, //通过点击行来展开子行
+    expandIconColumnIndex: { default: 1, type: Number }, //展开的图标显示在哪一列，如果没有 rowSelection，默认显示在第一列，否则显示在选择框后面
+    indentSize: { default: 15, type: Number }, //展示树形数据时，每层缩进的宽度，以 px 为单位
+    ellipsis: { default: false, type: Boolean }, // 是否自动省略超长的列内容
   },
   setup(props, { emit, slots }) {
     const state = reactive({
@@ -192,7 +202,13 @@ export default defineComponent({
       }
 
       state.tableLoading = true;
-      const pagedResult = await fetchDataSource(state.fetchDataSource, props.localData, state.tableQueryKey, state.tableResultKey);
+      const pagedResult = await fetchDataSource(
+        state.fetchDataSource,
+        props.localData,
+        state.tableQueryKey,
+        state.tableResultKey,
+        props.childrenColumnName
+      );
       // 设置排序 受控属性 来修改排序箭头样式
       props.columns.forEach((s) => {
         const key = s.sortKey != undefined ? s.sortKey : s.key;
@@ -409,7 +425,7 @@ export default defineComponent({
       state.loading = true;
       restOrder();
       state.pagination.pageSize = state.maxPageSize;
-      state.tableColumns = initColumns(props.columns, props.showRecord, props.scroll);
+      state.tableColumns = initColumns(props.columns, props.showRecord, props.scroll, props.ellipsis);
       await refreshTable();
 
       state.tableColumns.forEach((col: TableColumn) => {
@@ -532,6 +548,14 @@ export default defineComponent({
         p.scroll = props.scroll;
       }
 
+      if (props.defaultExpandedRowKeys && props.defaultExpandedRowKeys != null) {
+        p.defaultExpandedRowKeys = props.defaultExpandedRowKeys;
+      }
+
+      if (props.expandedRowKeys && props.expandedRowKeys != null) {
+        p.expandedRowKeys = props.expandedRowKeys;
+      }
+
       return p;
     };
 
@@ -554,11 +578,18 @@ export default defineComponent({
           }}
           scroll={props.scroll}
           rowClassName={props.rowClassName}
+          size={props.size}
+          childrenColumnName={props.childrenColumnName}
+          defaultExpandAllRows={props.defaultExpandAllRows}
+          expandRowByClick={props.expandRowByClick}
+          indentSize={props.indentSize}
+          expandIconColumnIndex={props.expandIconColumnIndex}
           {...dynamicProps()}
           on-change={onTableChange}
           on-expand={onTableExpand}
           on-expandedRowsChange={onExpandedRowsChange}>
           {slots.expandedRowRender && <div slot="expandedRowRender">{slots.expandedRowRender()}</div>}
+          {slots.expandIcon && <div slot="expandIcon">{slots.expandIcon()}</div>}
         </a-table>
       </div>
     );

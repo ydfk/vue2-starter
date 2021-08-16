@@ -27,7 +27,12 @@ import store from "@/store";
 import { A_LOADED, A_LOADING } from "@/store/store.types";
 import { ExportSheetModel, ExportToExcel } from "./export/exportToExcel";
 
-export const initColumns = (columns: Array<TableColumn>, showRecord: boolean, tableScroll: Record<string, any>): Array<TableColumn> => {
+export const initColumns = (
+  columns: Array<TableColumn>,
+  showRecord: boolean,
+  tableScroll: Record<string, any>,
+  ellipsis: boolean
+): Array<TableColumn> => {
   let columnsWithRecord: Array<TableColumn> = columns;
   if (showRecord) {
     let recordFixed = false;
@@ -69,6 +74,10 @@ export const initColumns = (columns: Array<TableColumn>, showRecord: boolean, ta
       c.sorter = false;
     }
     c.originalWidth = c.width;
+
+    if (c.ellipsis == undefined) {
+      c.ellipsis = ellipsis;
+    }
   });
 
   return columnsWithRecord;
@@ -161,7 +170,8 @@ export const fetchDataSource = async (
   fetch: TableFetchDataSource,
   localData: BaseModel[],
   tableQueryKey: TableQueryKeyModel,
-  tableResultKey: TableResultKeyModel
+  tableResultKey: TableResultKeyModel,
+  childrenColumnName: string
 ): Promise<PagedResult<TableDataSource>> => {
   const pageQuery = Object.assign(
     {
@@ -209,12 +219,15 @@ export const fetchDataSource = async (
       pagedData.pageResults = localData.slice((fetch.pageCurrent - 1) * fetch.pageSize, fetch.pageSize * fetch.pageCurrent);
     }
   }
+
   const dataSources = getDataSource(
     pagedData.pageResults,
     fetch.columns,
     pageQuery[tableQueryKey.pageCurrent] as number,
     fetch.pageSize,
-    fetch.actionFunc
+    fetch.actionFunc,
+    childrenColumnName,
+    true
   );
 
   return {
@@ -355,18 +368,21 @@ const formatDataSource = (value: any, format: string | undefined, formatFunc: ((
 };
 
 const getDataSource = (
-  data: Array<BaseModel>,
-  columns: Array<TableColumn>,
+  data: BaseModel[],
+  columns: TableColumn[],
   page: number,
   pageSize: number,
-  actionFunc: (model: BaseModel) => Array<TableAction>
+  actionFunc: (model: BaseModel) => TableAction[],
+  childrenColumnName: string,
+  hasRecord = false
 ): Array<TableDataSource> => {
   const dataSources: Array<TableDataSource> = [];
 
   if (data) {
     let record = (page - 1) * pageSize + 1;
     data.forEach((d) => {
-      const dataSource: TableDataSource = { key: d.id.toString(), [TABLE_RECORD_KEY]: record };
+      const dataSource: TableDataSource = { key: d.id.toString() };
+
       Object.entries(d).forEach(([key, value]) => {
         dataSource[key] = value;
         columns
@@ -382,8 +398,16 @@ const getDataSource = (
         dataSource.actions = actionFunc(d);
       }
 
+      if (d[childrenColumnName] && d[childrenColumnName].length > 0) {
+        dataSource[childrenColumnName] = getDataSource(d[childrenColumnName], columns, page, pageSize, actionFunc, childrenColumnName, false);
+      }
+
+      if (hasRecord) {
+        dataSource[TABLE_RECORD_KEY] = record;
+        record++;
+      }
+
       dataSources.push(dataSource);
-      record++;
     });
   }
 

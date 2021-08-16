@@ -3,7 +3,7 @@
  * @Author: ydfk
  * @Date: 2021-06-15 18:12:15
  * @LastEditors: ydfk
- * @LastEditTime: 2021-08-16 10:27:41
+ * @LastEditTime: 2021-08-16 17:19:51
 -->
 <!--
   - Copyright (c) QJJS. All rights reserved.
@@ -68,6 +68,8 @@
               :columns="tableColumns"
               :queryApi="tableQueryApi"
               :actionFunc="setActions"
+              :bordered="false"
+              :indentSize="35"
               @action="onActions"
             >
               <template #headerLeft><a-button @click="onRefreshTable">刷新列表</a-button></template>
