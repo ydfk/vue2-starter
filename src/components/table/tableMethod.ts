@@ -11,11 +11,11 @@ import {
   TableAction,
   TableColumn,
   TableDataSource,
-  TableExportModel,
   TableFetchDataSource,
   TableFilterDescriptor,
-  TablePageQuery,
+  TableQueryKeyDefault,
   TableQueryKeyModel,
+  TableResultKeyDefault,
   TableResultKeyModel,
 } from "./tableModel";
 import { TABLE_ACTION_KEY, TABLE_DESC_ORDER_KEY, TABLE_RECORD_KEY, TABLE_RECORD_WIDTH } from "./tableConst";
@@ -68,6 +68,7 @@ export const initColumns = (columns: Array<TableColumn>, showRecord: boolean, ta
     } else {
       c.sorter = false;
     }
+    c.originalWidth = c.width;
   });
 
   return columnsWithRecord;
@@ -122,16 +123,19 @@ export const initColumnActions = (dataSources: TableDataSource[], columns: Table
         actionColumnWidth = 200;
       }
 
-      columns.push({
-        key: TABLE_ACTION_KEY,
-        dataIndex: TABLE_ACTION_KEY,
-        title: "操作",
-        width: actionColumnWidth,
-        align: TableAlignEnum.CENTER,
-        filter: false,
-        sorter: false,
-        //scopedSlots: { customRender: "action" }
-      });
+      if (columns.every((x) => x.key != TABLE_ACTION_KEY)) {
+        columns.push({
+          key: TABLE_ACTION_KEY,
+          dataIndex: TABLE_ACTION_KEY,
+          title: "操作",
+          width: actionColumnWidth,
+          originalWidth: actionColumnWidth,
+          align: TableAlignEnum.CENTER,
+          filter: false,
+          sorter: false,
+          //scopedSlots: { customRender: "action" }
+        });
+      }
     }
   }
 
@@ -140,11 +144,11 @@ export const initColumnActions = (dataSources: TableDataSource[], columns: Table
   const tableWidth = offsetWidth - TABLE_RECORD_WIDTH - actionColumnWidth;
 
   columns.forEach((c) => {
-    if (typeof c.width == "string") {
-      if (c.width?.includes("px")) {
-        c.width = +c.width.split("px")[0];
-      } else if (c.width?.includes("%")) {
-        const cwd = +c.width.split("%")[0];
+    if (typeof c.originalWidth == "string") {
+      if (c.originalWidth?.includes("px")) {
+        c.width = +c.originalWidth.split("px")[0];
+      } else if (c.originalWidth?.includes("%")) {
+        const cwd = +c.originalWidth.split("%")[0];
         c.width = (+cwd * tableWidth) / 100;
       }
     }
@@ -220,71 +224,70 @@ export const fetchDataSource = async (
 };
 
 export const tableExport = async (
-  fetchArray: Array<TableFetchDataSource>,
-  exportModel: TableExportModel,
-  tableQueryKey: TableQueryKeyModel,
-  tableResultKey: TableResultKeyModel
+  fileName: string,
+  fetch: TableFetchDataSource,
+  tableQueryKey: TableQueryKeyModel = TableQueryKeyDefault,
+  tableResultKey: TableResultKeyModel = TableResultKeyDefault,
+  total: number = 999999999
 ): Promise<void> => {
   await store.dispatch(A_LOADING);
 
-  const name = exportModel && exportModel.fileName;
+  const name = fileName || fetch.sheetName;
   const sheets: Array<ExportSheetModel> = [];
 
   const promiseArray: any[] = [];
 
-  for (const fetch of fetchArray) {
-    let pageQuery = {
-      [tableQueryKey.pageCurrent]: 1,
-      [tableQueryKey.pageSize]: exportModel.total,
-      [tableQueryKey.searchText]: fetch.searchText || "",
-    };
+  let pageQuery = {
+    [tableQueryKey.pageCurrent]: 1,
+    [tableQueryKey.pageSize]: total,
+    [tableQueryKey.searchText]: fetch.searchText || "",
+  };
 
-    if (fetch.queryParams) {
-      pageQuery = Object.assign(fetch.queryParams, pageQuery);
-    }
+  if (fetch.queryParams) {
+    pageQuery = Object.assign(fetch.queryParams, pageQuery);
+  }
 
-    const allData = await page(fetch.queryApi, pageQuery, tableQueryKey, tableResultKey);
+  const allData = await page(fetch.queryApi, pageQuery, tableQueryKey, tableResultKey);
 
-    if (allData && allData.pageResults) {
-      import("./export/exportToExcel").then((excel) => {
-        const columns = fetch.columns;
-        const header: Array<string> = [];
-        const headerKey: Array<string> = [];
-        const exportData: Array<Array<any>> = [];
-        columns.forEach((c) => {
-          if (c.key != TABLE_ACTION_KEY && c.key != TABLE_RECORD_KEY) {
-            header.push(c.title as string);
-            headerKey.push(c.key);
+  if (allData && allData.pageResults) {
+    import("./export/exportToExcel").then((excel) => {
+      const columns = fetch.columns;
+      const header: Array<string> = [];
+      const headerKey: Array<string> = [];
+      const exportData: Array<Array<any>> = [];
+      columns.forEach((c) => {
+        if (c.key != TABLE_ACTION_KEY && c.key != TABLE_RECORD_KEY) {
+          header.push(c.title as string);
+          headerKey.push(c.key);
+        }
+      });
+      allData.pageResults.forEach((d) => {
+        const data: Array<any> = [];
+        headerKey.forEach((k) => {
+          const value = d[k];
+          if (value && value.toString().indexOf("T") > 0) {
+            const date = moment(value);
+            if (date.isValid()) {
+              data.push(date.toDate());
+            } else {
+              data.push(value);
+            }
+          } else {
+            if (value.indexOf("0001-01-01") > -1 || value.indexOf("1970-01-01") > -1) {
+              data.push("");
+            } else {
+              data.push(value);
+            }
           }
         });
-        allData.pageResults.forEach((d) => {
-          const data: Array<any> = [];
-          headerKey.forEach((k) => {
-            const value = d[k];
-            if (value && value.toString().indexOf("T") > 0) {
-              const date = moment(value);
-              if (date.isValid()) {
-                data.push(date.toDate());
-              } else {
-                data.push(value);
-              }
-            } else {
-              if (value.indexOf("0001-01-01") > -1 || value.indexOf("1970-01-01") > -1) {
-                data.push("");
-              } else {
-                data.push(value);
-              }
-            }
-          });
-          exportData.push(data);
-        });
-
-        sheets.push({ header: header, data: exportData, sheetName: fetch.sheetName || "sheet1" });
+        exportData.push(data);
       });
-    }
 
-    promiseArray.push(allData);
+      sheets.push({ header: header, data: exportData, sheetName: fetch.sheetName || "sheet1" });
+    });
   }
+
+  promiseArray.push(allData);
 
   Promise.all(promiseArray).then(() => {
     ExportToExcel({
@@ -313,13 +316,7 @@ const page = async (
 
   const result = await axios.post<any>(queryApi, pageQuery);
 
-  if (
-    typeof result === "object" &&
-    Object.prototype.hasOwnProperty.call(result, tableResultKey.totalCount) &&
-    Object.prototype.hasOwnProperty.call(result, tableResultKey.pageResults)
-  ) {
-    return result;
-  } else if (Array.isArray(result)) {
+  if (Array.isArray(result)) {
     return {
       totalCount: result.length,
       pageResults: result,

@@ -3,7 +3,7 @@
  * @Author: ydfk
  * @Date: 2021-04-22 10:15:59
  * @LastEditors: ydfk
- * @LastEditTime: 2021-08-11 10:21:40
+ * @LastEditTime: 2021-08-16 10:39:30
  */
 
 import { TableOrderEnum, TableAlignEnum, TableActionKeyEnum, TableKeyEnum, TableFilterOperatorEnum } from "./tableEnum";
@@ -43,6 +43,7 @@ export interface TableColumn {
   resizable?: boolean; // 是否列可拖动
 
   hidden?: boolean; //是否显示
+  originalWidth?: string | number; // 原始宽度
   [key: string]: any;
 }
 
@@ -100,11 +101,6 @@ export interface TablePageQuery {
   ascOrderBy?: Array<string>; // 升序域
   descOrderBy?: Array<string>; // 降序域
   filters?: Array<TableFilterDescriptor>;
-}
-
-export interface TableExportModel {
-  total: number;
-  fileName?: string;
 }
 
 export interface TableQueryKeyModel {

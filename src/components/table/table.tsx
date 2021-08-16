@@ -29,6 +29,7 @@ import { BusEnum } from "@/commons/enums";
 import { getPageStore, setPageStore } from "./pageStorage";
 import "./table.sass";
 import VueDraggableResizable from "vue-draggable-resizable";
+import useEvent from "@/hooks/useEvent";
 
 export default defineComponent({
   components: { VueDraggableResizable },
@@ -314,20 +315,12 @@ export default defineComponent({
      */
     const onExport = async () => {
       state.exportLoading = true;
-      let fetch = [state.fetchDataSource];
       if (props.exportQuery) {
-        fetch = [props.exportQuery];
+        Object.assign(state.fetchDataSource, props.exportQuery);
+        Object.assign(state.fetchDataSource, { pageCurrent: 1 });
       }
 
-      await tableExport(
-        fetch,
-        {
-          fileName: props.name,
-          total: state.pagination.total,
-        },
-        state.tableQueryKey,
-        state.tableResultKey
-      );
+      await tableExport(props.name, state.fetchDataSource, state.tableQueryKey, state.tableResultKey);
       state.exportLoading = false;
     };
 
@@ -349,6 +342,14 @@ export default defineComponent({
 
         await refreshTable();
       }
+    };
+
+    const onTableExpand = (expanded, record) => {
+      emit("expand", expanded, record);
+    };
+
+    const onExpandedRowsChange = (expandedRowKeys) => {
+      emit("expandedRowsChange", expandedRowKeys);
     };
 
     /**
@@ -386,9 +387,17 @@ export default defineComponent({
     };
 
     /**
+     * 响应屏幕变化
+     */
+    const handleResize = (e: Event) => {
+      initColumnActions(state.dataSource, state.tableColumns, state.tableId);
+    };
+
+    /**
      * 注册回车事件
      */
     useEnterKeyupEvent(onSearch);
+    useEvent("resize", handleResize);
 
     ////注册bus事件
     const { registerBus } = useVueBus();
@@ -516,6 +525,16 @@ export default defineComponent({
       );
     };
 
+    const dynamicProps = () => {
+      const p: any = {};
+
+      if (props.scroll && props.scroll != {}) {
+        p.scroll = props.scroll;
+      }
+
+      return p;
+    };
+
     const tableBody = () => (
       <div class={props.showHeader ? "table-content" : "table-content--noHeader"}>
         <a-table
@@ -535,8 +554,12 @@ export default defineComponent({
           }}
           scroll={props.scroll}
           rowClassName={props.rowClassName}
-          vOn:change={onTableChange}
-        />
+          {...dynamicProps()}
+          on-change={onTableChange}
+          on-expand={onTableExpand}
+          on-expandedRowsChange={onExpandedRowsChange}>
+          {slots.expandedRowRender && <div slot="expandedRowRender">{slots.expandedRowRender()}</div>}
+        </a-table>
       </div>
     );
 
