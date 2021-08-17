@@ -34,7 +34,11 @@ import useEvent from "@/hooks/useEvent";
 export default defineComponent({
   components: { VueDraggableResizable },
   props: {
-    tableKey: { default: -1, type: Number as PropType<TableKeyEnum>, required: true },
+    tableKey: {
+      default: -1,
+      type: [Number, String],
+      required: true,
+    },
     size: { default: "default", type: String }, //表格大小	default | middle | small
     name: { default: "", type: String },
     searchTip: { default: "输入关键字查询", type: String },
@@ -106,6 +110,9 @@ export default defineComponent({
     expandIconColumnIndex: { default: 1, type: Number }, //展开的图标显示在哪一列，如果没有 rowSelection，默认显示在第一列，否则显示在选择框后面
     indentSize: { default: 15, type: Number }, //展示树形数据时，每层缩进的宽度，以 px 为单位
     ellipsis: { default: false, type: Boolean }, // 是否自动省略超长的列内容
+    expandIcon: {},
+    onlyHasDataShowExpandedRow: { default: false, type: Boolean }, //是在只有数据的时候才展示展开按钮,可使用showExpandedRowKey指定data中判断字段
+    showExpandedRowKey: { default: "hasExpandedRow", type: String }, //指定dataSource中那个字段来判断展示，需要和onlyHasDataShowExpandedRow配合
   },
   setup(props, { emit, slots }) {
     const state = reactive({
@@ -396,6 +403,7 @@ export default defineComponent({
     const emitChange = () => {
       emit("change", {
         key: props.tableKey,
+        query: state.fetchDataSource,
         column: state.tableColumns,
         dataSource: state.dataSource,
         pagination: state.pagination,
@@ -558,6 +566,39 @@ export default defineComponent({
 
       return p;
     };
+    const scopedSlots = () => {
+      let scopedSlots: any = {};
+
+      if (slots.expandedRowRender) {
+        scopedSlots.expandedRowRender = (record, index, indent, expanded) =>
+          slots.expandedRowRender && slots.expandedRowRender(record, index, indent, expanded);
+      }
+
+      if (slots.expandIcon) {
+        scopedSlots.expandIcon = (expandProps) => slots.expandIcon && slots.expandIcon(expandProps);
+      } else {
+        if (slots.expandedRowRender && props.onlyHasDataShowExpandedRow) {
+          scopedSlots.expandIcon = (expandProps) => {
+            if (expandProps.record[props.showExpandedRowKey]) {
+              return (
+                <div
+                  role="button"
+                  tabIndex={0}
+                  class={`ant-table-row-expand-icon ${expandProps.expanded ? "ant-table-row-expanded" : "ant-table-row-collapsed"}`}
+                  onClick={(event) => {
+                    expandProps.onExpand(expandProps.record, event);
+                  }}
+                />
+              );
+            } else {
+              return null;
+            }
+          };
+        }
+      }
+
+      return { scopedSlots };
+    };
 
     const tableBody = () => (
       <div class={props.showHeader ? "table-content" : "table-content--noHeader"}>
@@ -584,13 +625,13 @@ export default defineComponent({
           expandRowByClick={props.expandRowByClick}
           indentSize={props.indentSize}
           expandIconColumnIndex={props.expandIconColumnIndex}
+          expandIcon={props.expandIcon}
           {...dynamicProps()}
           on-change={onTableChange}
           on-expand={onTableExpand}
-          on-expandedRowsChange={onExpandedRowsChange}>
-          {slots.expandedRowRender && <div slot="expandedRowRender">{slots.expandedRowRender()}</div>}
-          {slots.expandIcon && <div slot="expandIcon">{slots.expandIcon()}</div>}
-        </a-table>
+          on-expandedRowsChange={onExpandedRowsChange}
+          {...scopedSlots()}
+        />
       </div>
     );
 
