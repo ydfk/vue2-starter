@@ -564,7 +564,7 @@ export default defineComponent({
         p.expandedRowKeys = props.expandedRowKeys;
       }
 
-      return p;
+      return { props: p };
     };
     const scopedSlots = () => {
       let scopedSlots: any = {};

@@ -3,7 +3,7 @@
  * @Author: ydfk
  * @Date: 2021-06-15 18:12:15
  * @LastEditors: ydfk
- * @LastEditTime: 2021-08-16 17:19:51
+ * @LastEditTime: 2021-08-18 13:52:14
 -->
 <!--
   - Copyright (c) QJJS. All rights reserved.
@@ -70,6 +70,7 @@
               :actionFunc="setActions"
               :bordered="false"
               :indentSize="35"
+              :scroll="{ x: 3000 }"
               @action="onActions"
             >
               <template #headerLeft><a-button @click="onRefreshTable">刷新列表</a-button></template>

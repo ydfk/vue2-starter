@@ -105,6 +105,7 @@ export default defineComponent({
           title: "姓名",
           width: "20%",
           resizable: true,
+          fixed: "left",
           // customRender: (name: string, record) => {
           //   if (record.children) {
           //     return (
