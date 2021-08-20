@@ -515,8 +515,8 @@ export default defineComponent({
                   {slots.headerLeft && slots.headerLeft()}
                   {props.showSearch && (
                     <div class="table-header-search">
-                      <a-input className="table-header-searchText" placeholder={props.searchTip} vModel={state.searchText} />
-                      <a-button-group className="table-header-search-btn">
+                      <a-input class="table-header-searchText" placeholder={props.searchTip} vModel={state.searchText} />
+                      <a-button-group class="table-header-search-btn">
                         <a-button type="primary" on-click={onSearch}>
                           <a-icon type="search" />
                           查询
