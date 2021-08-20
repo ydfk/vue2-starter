@@ -27,20 +27,12 @@ import store from "@/store";
 import { A_LOADED, A_LOADING } from "@/store/store.types";
 import { ExportSheetModel, ExportToExcel } from "./export/exportToExcel";
 
-export const initColumns = (
-  columns: Array<TableColumn>,
-  showRecord: boolean,
-  tableScroll: Record<string, any>,
-  ellipsis: boolean
-): Array<TableColumn> => {
+export const initColumns = (columns: Array<TableColumn>, showRecord: boolean, ellipsis: boolean): Array<TableColumn> => {
   let columnsWithRecord: Array<TableColumn> = columns;
   if (showRecord) {
     let recordFixed = false;
-    if (typeof tableScroll === "object" && JSON.stringify(tableScroll) !== "{}") {
-      recordFixed = true;
-    }
 
-    if (columns.some((x) => x.fixed != undefined)) {
+    if (columns.some((x) => x.fixed != undefined && x.fixed != false)) {
       recordFixed = true;
     }
 
@@ -132,6 +124,11 @@ export const initColumnActions = (dataSources: TableDataSource[], columns: Table
         actionColumnWidth = 200;
       }
 
+      let fixed: any = false;
+      if (columns.some((x) => x.fixed != undefined && x.fixed != false)) {
+        fixed = "right";
+      }
+
       if (columns.every((x) => x.key != TABLE_ACTION_KEY)) {
         columns.push({
           key: TABLE_ACTION_KEY,
@@ -142,6 +139,7 @@ export const initColumnActions = (dataSources: TableDataSource[], columns: Table
           align: TableAlignEnum.CENTER,
           filter: false,
           sorter: false,
+          fixed: fixed,
           //scopedSlots: { customRender: "action" }
         });
       }
@@ -158,7 +156,7 @@ export const initColumnActions = (dataSources: TableDataSource[], columns: Table
         c.width = +c.originalWidth.split("px")[0];
       } else if (c.originalWidth?.includes("%")) {
         const cwd = +c.originalWidth.split("%")[0];
-        c.width = (+cwd * tableWidth) / 100;
+        c.width = Math.floor((+cwd * tableWidth) / 100);
       }
     }
   });

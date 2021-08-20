@@ -433,7 +433,7 @@ export default defineComponent({
       state.loading = true;
       restOrder();
       state.pagination.pageSize = state.maxPageSize;
-      state.tableColumns = initColumns(props.columns, props.showRecord, props.scroll, props.ellipsis);
+      state.tableColumns = initColumns(props.columns, props.showRecord, props.ellipsis);
       await refreshTable();
 
       state.tableColumns.forEach((col: TableColumn) => {
