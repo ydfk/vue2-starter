@@ -239,7 +239,7 @@ export const tableExport = async (
   fetch: TableFetchDataSource,
   tableQueryKey: TableQueryKeyModel = TableQueryKeyDefault,
   tableResultKey: TableResultKeyModel = TableResultKeyDefault,
-  total: number = 999999999
+  total = 999999999
 ): Promise<void> => {
   await store.dispatch(A_LOADING);
 

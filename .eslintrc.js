@@ -3,7 +3,7 @@
  * @Author: ydfk
  * @Date: 2020-05-19 10:16:37
  * @LastEditors: ydfk
- * @LastEditTime: 2021-08-04 13:55:28
+ * @LastEditTime: 2021-08-24 16:29:42
  */
 module.exports = {
   root: true,
@@ -21,7 +21,7 @@ module.exports = {
       "error",
       {
         selector: "variable",
-        format: ["camelCase", "UPPER_CASE"],
+        format: ["camelCase", "UPPER_CASE", "PascalCase"],
       },
     ],
     "@typescript-eslint/no-empty-function": "off",

@@ -10,7 +10,9 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "prettier --write src && eslint --quiet --fix src --ext .ts,.js,.vue,.tsx,.jsx",
-    "lint:style": "stylelint src/**/*.{sass,vue,tsx}"
+    "lint:style": "stylelint src/**/*.{sass,vue,tsx}",
+    "cz": "yarn log && git add . && git cz",
+    "log": "conventional-changelog --config ./node_modules/vue-cli-plugin-commitlint/lib/log -i CHANGELOG.md -s -r 0"
   },
   "dependencies": {
     "@vue/composition-api": "^1.0.3",
@@ -48,10 +50,14 @@
     "@vue/eslint-config-typescript": "^7.0.0",
     "babel-plugin-import": "^1.13.3",
     "babel-preset-vca-jsx": "^0.3.6",
+    "commitizen": "^4.0.3",
+    "commitlint": "^8.2.0",
     "compression-webpack-plugin": "^6.1.1",
+    "conventional-changelog-cli": "^2.0.28",
     "eslint": "^7.31.0",
     "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-vue": "^7.14.0",
+    "husky": "^3.0.9",
     "less": "3.13.1",
     "less-loader": "^5.0.0",
     "lint-staged": "^11.0.1",
@@ -59,6 +65,7 @@
     "postcss-loader": "^6.1.1",
     "pre-commit": "^1.2.2",
     "prettier": "^2.3.2",
+    "right-pad": "^1.0.1",
     "sass": "^1.35.2",
     "sass-loader": "10.1.1",
     "style-resources-loader": "^1.4.1",
@@ -71,20 +78,27 @@
     "terser-webpack-plugin": "^4.2.3",
     "ts-import-plugin": "^1.6.7",
     "typescript": "~4.3.2",
+    "vue-cli-plugin-commitlint": "~1.0.12",
     "vue-svg-loader": "^0.16.0",
     "vue-template-compiler": "^2.6.14"
   },
-  "gitHooks": {
-    "pre-commit": "lint-staged"
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/vue-cli-plugin-commitlint/lib/cz"
+    }
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
   },
   "lint-staged": {
     "*.{sass,vue,tsx}": [
-      "stylelint",
-      "git add"
+      "yarn lint:style"
     ],
     "*.{js,jsx,vue,ts,tsx}": [
-      "prettier --write",
-      "git add"
+      "yarn lint"
     ]
   }
 }

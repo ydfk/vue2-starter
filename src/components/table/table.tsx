@@ -567,7 +567,7 @@ export default defineComponent({
       return { props: p };
     };
     const scopedSlots = () => {
-      let scopedSlots: any = {};
+      const scopedSlots: any = {};
 
       if (slots.expandedRowRender) {
         scopedSlots.expandedRowRender = (record, index, indent, expanded) =>
