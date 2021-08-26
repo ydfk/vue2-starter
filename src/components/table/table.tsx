@@ -343,7 +343,7 @@ export default defineComponent({
         Object.assign(state.fetchDataSource, { pageCurrent: 1 });
       }
 
-      await tableExport(props.name, state.fetchDataSource, state.tableQueryKey, state.tableResultKey);
+      await tableExport(props.name, state.fetchDataSource, state.tableQueryKey, state.tableResultKey, props.childrenColumnName);
       state.exportLoading = false;
     };
 

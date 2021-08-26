@@ -52,6 +52,7 @@ Mock.mock(/\/demoTable/, "post", (option) => {
       sex: index % 2 === 0 ? "男" : "女",
       city: Random.city(),
       time: Random.datetime(),
+      income: Random.float(1000, 99999999999),
       children: [
         {
           id: Mock.mock("@guid"),
@@ -62,6 +63,7 @@ Mock.mock(/\/demoTable/, "post", (option) => {
           sex: index % 2 === 0 ? "男" : "女",
           city: Random.city(),
           time: Random.datetime(),
+          income: Random.float(1000, 99999999999),
           children: [
             {
               id: Mock.mock("@guid"),
@@ -72,6 +74,7 @@ Mock.mock(/\/demoTable/, "post", (option) => {
               sex: index % 2 === 0 ? "男" : "女",
               city: Random.city(),
               time: Random.datetime(),
+              income: Random.float(1000, 99999999999),
             },
             {
               id: Mock.mock("@guid"),
@@ -82,6 +85,7 @@ Mock.mock(/\/demoTable/, "post", (option) => {
               sex: index % 2 === 0 ? "男" : "女",
               city: Random.city(),
               time: Random.datetime(),
+              income: Random.float(1000, 99999999999),
               children: [
                 {
                   id: Mock.mock("@guid"),
@@ -92,6 +96,7 @@ Mock.mock(/\/demoTable/, "post", (option) => {
                   sex: index % 2 === 0 ? "男" : "女",
                   city: Random.city(),
                   time: Random.datetime(),
+                  income: Random.float(1000, 99999999999),
                 },
                 {
                   id: Mock.mock("@guid"),
@@ -102,6 +107,7 @@ Mock.mock(/\/demoTable/, "post", (option) => {
                   sex: index % 2 === 0 ? "男" : "女",
                   city: Random.city(),
                   time: Random.datetime(),
+                  income: Random.float(1000, 99999999999),
                 },
               ],
             },
@@ -116,6 +122,7 @@ Mock.mock(/\/demoTable/, "post", (option) => {
           sex: index % 2 === 0 ? "男" : "女",
           city: Random.city(),
           time: Random.datetime(),
+          income: Random.float(1000, 99999999999),
         },
       ],
     });

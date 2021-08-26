@@ -239,7 +239,7 @@ export const tableExport = async (
   fetch: TableFetchDataSource,
   tableQueryKey: TableQueryKeyModel = TableQueryKeyDefault,
   tableResultKey: TableResultKeyModel = TableResultKeyDefault,
-  total = 999999999
+  childrenColumnName: string
 ): Promise<void> => {
   await store.dispatch(A_LOADING);
 
@@ -250,7 +250,7 @@ export const tableExport = async (
 
   let pageQuery = {
     [tableQueryKey.pageCurrent]: 1,
-    [tableQueryKey.pageSize]: total,
+    [tableQueryKey.pageSize]: 9999999999,
     [tableQueryKey.searchText]: fetch.searchText || "",
   };
 
@@ -267,31 +267,13 @@ export const tableExport = async (
       const headerKey: Array<string> = [];
       const exportData: Array<Array<any>> = [];
       columns.forEach((c) => {
-        if (c.key != TABLE_ACTION_KEY && c.key != TABLE_RECORD_KEY) {
+        if (c.key != TABLE_ACTION_KEY && c.key != TABLE_RECORD_KEY && c.export != false) {
           header.push(c.title as string);
           headerKey.push(c.key);
         }
       });
       allData.pageResults.forEach((d) => {
-        const data: Array<any> = [];
-        headerKey.forEach((k) => {
-          const value = d[k];
-          if (value && value.toString().indexOf("T") > 0) {
-            const date = moment(value);
-            if (date.isValid()) {
-              data.push(date.toDate());
-            } else {
-              data.push(value);
-            }
-          } else {
-            if (value.indexOf("0001-01-01") > -1 || value.indexOf("1970-01-01") > -1) {
-              data.push("");
-            } else {
-              data.push(value);
-            }
-          }
-        });
-        exportData.push(data);
+        exportSetData(exportData, headerKey, columns, d, childrenColumnName);
       });
 
       sheets.push({ header: header, data: exportData, sheetName: fetch.sheetName || "sheet1" });
@@ -340,10 +322,15 @@ const page = async (
   }
 };
 
-const formatDataSource = (value: any, format: string | undefined, formatFunc: ((data: any) => string | JSX.Element) | undefined, column: any) => {
+const formatDataSource = (
+  value: any,
+  format: string | undefined,
+  formatFunc: ((data: any) => string | JSX.Element) | undefined,
+  dataRow: BaseModel
+) => {
   let result = value;
   if (formatFunc && typeof formatFunc == "function") {
-    result = formatFunc(column);
+    result = formatFunc(dataRow);
   } else {
     if (value) {
       if (format) {
@@ -427,4 +414,28 @@ const getFilters = (columns: Array<TableColumn>, searchText: string) => {
   }
 
   return filters;
+};
+
+const exportSetData = (exportData: any[][], headerKey: string[], columns: TableColumn[], data: BaseModel, childrenColumnName: string) => {
+  const rowData: any[] = [];
+
+  headerKey.forEach((k) => {
+    const column = columns.find((f) => f.key == k);
+    if (column) {
+      const value = data[k];
+      if (column.exportFormat || column.exportFormatFunc) {
+        rowData.push(formatDataSource(value, column.exportFormat, column.exportFormatFunc, data));
+      } else {
+        rowData.push(value);
+      }
+    }
+  });
+
+  exportData.push(rowData);
+
+  if (data[childrenColumnName] && data[childrenColumnName].length > 0) {
+    data[childrenColumnName].forEach((childData) => {
+      exportSetData(exportData, headerKey, columns, childData, childrenColumnName);
+    });
+  }
 };

@@ -3,7 +3,7 @@
  * @Author: ydfk
  * @Date: 2021-04-22 10:15:59
  * @LastEditors: ydfk
- * @LastEditTime: 2021-08-16 15:48:43
+ * @LastEditTime: 2021-08-26 10:10:36
  */
 
 import { TableOrderEnum, TableAlignEnum, TableActionKeyEnum, TableKeyEnum, TableFilterOperatorEnum } from "./tableEnum";
@@ -43,8 +43,12 @@ export interface TableColumn {
   resizable?: boolean; // 是否列可拖动
 
   hidden?: boolean; //是否显示
-
   originalWidth?: string | number; // 原始宽度
+
+  export?: boolean; //是否可导出，undefinedr认为是导出
+  exportFormat?: string; /// 导出格式化
+  exportFormatFunc?: (data: any) => string | JSX.Element; /// 导出格式化方法
+
   [key: string]: any;
 }
 

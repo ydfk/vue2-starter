@@ -12,7 +12,7 @@ import DatePicker from "@/components/datePicker/datePicker";
 import DateRangePicker from "@/components/dateRangePicker/dateRangePicker";
 import { openErrorMsg, openSuccessMsg } from "@/components/dialog/dialogCommon";
 import moment from "moment";
-import { DATE_FORMAT, DATE_FORMAT_NO_TIME_ZH } from "@/commons/constants";
+import { DATE_FORMAT, DATE_FORMAT_NO_TIME_ZH, NUMBER_FORMAT_N2 } from "@/commons/constants";
 import { datePickType } from "@/components/datePicker/datePickerType";
 import Dialog from "@/components/dialog/dialog";
 import Drawer from "@/components/drawer/drawer";
@@ -128,14 +128,20 @@ export default defineComponent({
         {
           key: "mobile",
           title: "手机",
-          width: "15%",
+          width: "10%",
           resizable: true,
         },
         {
           key: "email",
           title: "邮箱",
-          width: "15%",
+          width: "10%",
           resizable: true,
+        },
+        {
+          key: "income",
+          title: "收入",
+          width: "10%",
+          format: NUMBER_FORMAT_N2,
         },
         {
           key: "city",
