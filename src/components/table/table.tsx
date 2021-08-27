@@ -472,7 +472,7 @@ export default defineComponent({
         return k === key;
       });
 
-      if (!col.width || !col.resizable) {
+      if (!col || !col.width || !col.resizable) {
         return <th {...restProps}>{children}</th>;
       }
 

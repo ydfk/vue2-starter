@@ -82,6 +82,30 @@ export default defineComponent({
       tableKey: TableKeyEnum.demo,
       tableColumns: ref<TableColumn[]>([]),
       menuType: "top",
+      selectedRowKeys: [],
+      rowSelection: computed(() => {
+        return {
+          selectedRowKeys: state.selectedRowKeys,
+          onChange: (selectedRowKeys: string[]) => {
+            state.selectedRowKeys = selectedRowKeys;
+          },
+          hideDefaultSelections: true,
+          selections: [
+            {
+              key: "all-checked",
+              text: "全部勾选",
+              onSelect: () => {},
+            },
+            {
+              key: "no-checked",
+              text: "清空勾选",
+              onSelect: () => {
+                state.selectedRowKeys = [];
+              },
+            },
+          ],
+        };
+      }),
     });
 
     const demoForm = useAntdFormModel(FormEnum.demo);
