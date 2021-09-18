@@ -84,7 +84,10 @@ export default defineComponent({
     showPage: { default: true, type: Boolean },
     showRecord: { default: true, type: Boolean }, //是否显示序号
     bordered: { default: true, type: Boolean },
-
+    customHeaderRow: {
+      default: () => {},
+      type: Function as PropType<(column: any, index: any) => void>,
+    },
     customRow: {
       default: () => {},
       type: Function as PropType<(record: any, index: any) => void>,
@@ -191,7 +194,8 @@ export default defineComponent({
                   actionKey: action.key,
                 })
               )
-            }>
+            }
+          >
             {action.title}
           </a-button>
           {showDivider ? <a-divider type="vertical" /> : ""}
@@ -338,12 +342,13 @@ export default defineComponent({
      */
     const onExport = async () => {
       state.exportLoading = true;
+      const fetchDataSource = JSON.parse(JSON.stringify(state.fetchDataSource));
       if (props.exportQuery) {
-        Object.assign(state.fetchDataSource, props.exportQuery);
-        Object.assign(state.fetchDataSource, { pageCurrent: 1 });
+        Object.assign(fetchDataSource, props.exportQuery);
+        Object.assign(fetchDataSource, { pageCurrent: 1 });
       }
 
-      await tableExport(props.name, state.fetchDataSource, state.tableQueryKey, state.tableResultKey, props.childrenColumnName);
+      await tableExport(props.name, fetchDataSource, state.tableQueryKey, state.tableResultKey, props.childrenColumnName);
       state.exportLoading = false;
     };
 
@@ -610,6 +615,7 @@ export default defineComponent({
           dataSource={state.dataSource}
           pagination={false}
           rowSelection={props.rowSelection}
+          customHeaderRow={props.customHeaderRow}
           customRow={props.customRow}
           showHeader={props.showTableHeader}
           components={{
