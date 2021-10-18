@@ -7,6 +7,7 @@
  */
 export enum TableKeyEnum {
   demo = 0,
+  tableLocal = 1,
 }
 
 export enum TableAlignEnum {

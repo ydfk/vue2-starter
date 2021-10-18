@@ -28,16 +28,14 @@ export const menuRouters: RouterItemModel[] & RouterOptions["routes"] = [
     meta: {
       title: "示例",
     },
-    children: [
-      {
-        path: "m2",
-        name: "m2",
-        component: () => import("@/views/example/example.vue"),
-        meta: {
-          title: "示例二级菜单",
-        },
-      },
-    ],
+  },
+  {
+    path: "tableLocal",
+    name: "tableLocal",
+    component: () => import("@/views/example/TableLocal.vue"),
+    meta: {
+      title: "本地数据列表",
+    },
   },
 ];
 

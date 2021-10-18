@@ -53,7 +53,8 @@ export default defineComponent({
         value={state.selectValue}
         on-change={onChange}
         filterOption={filterOption}
-        showSearch={props.showSearch}>
+        showSearch={props.showSearch}
+      >
         {props.selectOption?.map((s) => (
           <a-select-option value={s.value}>{s.text}</a-select-option>
         ))}

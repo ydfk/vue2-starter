@@ -133,4 +133,23 @@ Mock.mock(/\/demoTable/, "post", (option) => {
   });
 });
 
+Mock.mock(/\/localTable/, "get", (option) => {
+  const pageResults = [];
+
+  for (let index = 0; index < 35; index++) {
+    pageResults.push({
+      id: Mock.mock("@guid"),
+      idNo: Random.id(),
+      name: Random.cname(),
+      mobile: "13312341234",
+      email: Random.email(),
+      sex: index % 2 === 0 ? "男" : "女",
+      city: Random.city(),
+      time: Random.datetime(),
+      income: Random.float(1000, 99999999999),
+    });
+  }
+  return builder(true, pageResults);
+});
+
 export default Mock;

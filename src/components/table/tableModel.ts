@@ -90,6 +90,7 @@ export interface TableFetchDataSource {
   descOrderBy: Array<string>; // 降序域
   actionFunc: (model: any) => Array<TableAction>;
   sheetName?: string;
+  filters?: TableFilterDescriptor[];
 }
 
 export interface TableFilterDescriptor {
@@ -105,7 +106,7 @@ export interface TablePageQuery {
   searchText: string;
   ascOrderBy?: Array<string>; // 升序域
   descOrderBy?: Array<string>; // 降序域
-  filters?: Array<TableFilterDescriptor>;
+  filters?: TableFilterDescriptor[];
 }
 
 export interface TableQueryKeyModel {
@@ -135,3 +136,11 @@ export const TableResultKeyDefault: TableResultKeyModel = {
   totalCount: "totalCount",
   pageResults: "pageResults",
 };
+
+export interface TableFilterDropdownModel {
+  clearFilters: () => void;
+  column: TableColumn;
+  confirm: () => void;
+  selectedKeys: string[];
+  setSelectedKeys: (selectedKeys: string[]) => void;
+}

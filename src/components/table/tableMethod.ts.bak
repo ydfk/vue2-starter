@@ -292,7 +292,7 @@ export const tableExport = async (
   const allData = await page(fetch.queryApi, pageQuery, tableQueryKey, tableResultKey);
 
   if (allData && allData.pageResults) {
-    import("./export/exportToExcel").then(() => {
+    import("./export/exportToExcel").then((excel) => {
       const columns = fetch.columns;
       const header: Array<string> = [];
       const headerKey: Array<string> = [];

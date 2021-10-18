@@ -198,8 +198,7 @@ export default defineComponent({
                   actionKey: action.key,
                 })
               )
-            }
-          >
+            }>
             {action.title}
           </a-button>
           {showDivider ? <a-divider type="vertical" /> : ""}
@@ -272,8 +271,7 @@ export default defineComponent({
                     }
 
                     filter.confirm();
-                  }}
-                >
+                  }}>
                   查询
                 </a-button>
                 <a-button
@@ -282,8 +280,7 @@ export default defineComponent({
                   onClick={() => {
                     state.tableColumnsFilters = state.tableColumnsFilters.filter((f) => f.member != filter.column.key);
                     filter.clearFilters();
-                  }}
-                >
+                  }}>
                   重置
                 </a-button>
               </div>
@@ -482,7 +479,7 @@ export default defineComponent({
     /**
      * 响应屏幕变化
      */
-    const handleResize = () => {
+    const handleResize = (e: Event) => {
       initColumnActions(state.dataSource, state.tableColumns, state.tableId);
     };
 

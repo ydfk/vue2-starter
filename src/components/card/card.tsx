@@ -45,7 +45,8 @@ export default defineComponent({
           hoverable={props.hoverable}
           loading={props.loading}
           headStyle={props.headStyle}
-          bodyStyle={props.bodyStyle}>
+          bodyStyle={props.bodyStyle}
+        >
           {(slots.default && slots.default()) || []}
         </a-card>
       </div>

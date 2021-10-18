@@ -1,11 +1,4 @@
 <!--
- * @Description: Copyright (c) ydfk. All rights reserved
- * @Author: ydfk
- * @Date: 2021-06-15 18:12:15
- * @LastEditors: ydfk
- * @LastEditTime: 2021-08-27 10:31:30
--->
-<!--
   - Copyright (c) QJJS. All rights reserved.
   - ProjectName: bhikku.vue
   - FileName : example.vue

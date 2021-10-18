@@ -31,21 +31,12 @@ import useVuex from "@/hooks/useVuex";
 import Tag from "@/components/tag/tag";
 import { G_MENU_SHOW_TOP, M_SET_MENU_SHOW_LEFT, M_SET_MENU_SHOW_TOP } from "@/store/store.types";
 import Upload from "@/components/upload/upload";
+import { DemoTableModel } from "@/commons/models/demoModel";
 
 type demoFormModel = {
   text: string;
   amount: number | undefined;
   type: string[] | undefined;
-};
-
-type demoTableModel = {
-  name: string;
-  mobile: string;
-  email: string;
-  sex: string;
-  city: string;
-  time: string;
-  [key: string]: any;
 };
 
 export default defineComponent({
@@ -130,6 +121,7 @@ export default defineComponent({
           width: "20%",
           resizable: true,
           fixed: "left",
+          filter: true,
           // customRender: (name: string, record) => {
           //   if (record.children) {
           //     return (
@@ -148,6 +140,7 @@ export default defineComponent({
           title: "身份证",
           width: "20%",
           resizable: true,
+          filter: true,
         },
         {
           key: "mobile",
@@ -195,7 +188,7 @@ export default defineComponent({
       return [TABLE_ACTION_DETAIL, TABLE_ACTION_DELETE];
     };
 
-    const onActions = async (record: demoTableModel) => {
+    const onActions = async (record: DemoTableModel) => {
       const { id, actionKey } = record;
       if (actionKey === TableActionKeyEnum.DETAIL) {
         openSuccessMsg(`详情${record}`);

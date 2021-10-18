@@ -84,7 +84,8 @@ export default defineComponent({
         openKeys={state.openKeys}
         on-openChange={onOpenChange}
         selectedKeys={state.keys}
-        on-click={onClick}>
+        on-click={onClick}
+      >
         {renderMenu(menuRouters)}
       </a-menu>
     );
