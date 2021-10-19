@@ -4,23 +4,19 @@
  / FileName : table.sass
  / Author : liyuhang
  / Date : 2020-03-04 21:38:38
- /
-@import "../../assets/var"
-@import "../../assets/mixin"
+ /*/
 
 .table
   font-size: 12px !important
   .table-header
     margin-bottom: 10px
-  .table-header-left
-    @include flex-center(row,flex-start)
+    
   .table-header-search
     width: 100%
-    @include flex-center
+    
   .table-header-search-btn
     margin-left: 2px
-  .table-header-right
-    @include flex-center(row,flex-end)
+    
   .table-content
     .ant-divider,
     .ant-divider-vertical
@@ -72,3 +68,7 @@
     transform: none !important
     cursor: col-resize
     touch-action: none
+.table-filterIcon
+  margin-top: 13px
+.table-filterIcon-filtered
+  color: $primary-color

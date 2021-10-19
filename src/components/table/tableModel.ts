@@ -48,7 +48,7 @@ export interface TableColumn {
   export?: boolean; //是否可导出，undefinedr认为是导出
   exportFormat?: string; /// 导出格式化
   exportFormatFunc?: (data: any) => string | JSX.Element; /// 导出格式化方法
-
+  filters?: TableColumnFilterValueModel[];
   [key: string]: any;
 }
 
@@ -137,10 +137,19 @@ export const TableResultKeyDefault: TableResultKeyModel = {
   pageResults: "pageResults",
 };
 
-export interface TableFilterDropdownModel {
+export interface TableColumnFilterDropdownModel {
   clearFilters: () => void;
   column: TableColumn;
   confirm: () => void;
   selectedKeys: string[];
   setSelectedKeys: (selectedKeys: string[]) => void;
+}
+
+export interface TableColumnFilterValueModel {
+  text: string;
+  value: any;
+}
+
+export interface TableColumnFilterModel {
+  [key: string]: string[];
 }

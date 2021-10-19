@@ -178,8 +178,7 @@ export const fetchDataSource = async (
       [tableQueryKey.searchText]: fetch.searchText || "",
       [tableQueryKey.ascOrderBy]: fetch.ascOrderBy,
       [tableQueryKey.descOrderBy]: fetch.descOrderBy,
-      //[tableQueryKey.filters]: getFilters(fetch.columns, fetch.searchText || "", fetch.filters),
-      [tableQueryKey.filters]: fetch.filters,
+      [tableQueryKey.filters]: getFilters(fetch.columns, fetch.searchText || "", fetch.filters),
     },
     fetch.queryParams
   );
@@ -221,17 +220,20 @@ export const fetchDataSource = async (
         if (filterLocalData.length == 0) {
           filterLocalData = localData;
         }
-        //todo 暂时之处理包含情况
-        if (filter.operator == TableFilterOperatorEnum.Contains) {
+        if (filter.value) {
           const column = fetch.columns.find((f) => f.key == filter.member);
           if (column) {
             filterLocalData = filterLocalData.filter((s) => {
-              const valueStr = s[column.key].toString().toLowerCase();
-              if (valueStr.indexOf(filter.value.toLowerCase()) > -1) {
-                return true;
-              } else {
-                return false;
+              const columnValue = s[column.key];
+              if (columnValue) {
+                const valueStr = columnValue.toString().toLowerCase();
+                if (filter.operator == TableFilterOperatorEnum.Contains) {
+                  return valueStr.indexOf(filter.value.toLowerCase()) > -1;
+                } else if (filter.operator == TableFilterOperatorEnum.IsIn) {
+                  return filter.value.some((vs) => vs.toLowerCase() == valueStr);
+                }
               }
+              return false;
             });
           }
         }
@@ -430,18 +432,18 @@ const getDataSource = (
   return dataSources;
 };
 
-const getFilters = (columns: Array<TableColumn>, searchText: string, filters: TableFilterDescriptor[] = []) => {
-  if (searchText) {
-    columns
-      .filter((c) => c.filter != false)
-      .forEach((c) => {
-        filters.push({
-          member: c.key,
-          operator: TableFilterOperatorEnum.Contains,
-          value: searchText,
-        });
-      });
-  }
+const getFilters = (columns: TableColumn[], searchText: string, filters: TableFilterDescriptor[] = []) => {
+  // if (searchText) {
+  //   columns
+  //     .filter((c) => c.filter != false)
+  //     .forEach((c) => {
+  //       filters.push({
+  //         member: c.key,
+  //         operator: TableFilterOperatorEnum.Contains,
+  //         value: searchText,
+  //       });
+  //     });
+  // }
 
   return filters;
 };

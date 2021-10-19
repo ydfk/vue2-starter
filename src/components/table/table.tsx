@@ -11,9 +11,10 @@ import { TableFilterOperatorEnum, TableKeyEnum, TableOrderEnum } from "./tableEn
 import {
   TableAction,
   TableColumn,
+  TableColumnFilterModel,
   TableDataSource,
   TableFilterDescriptor,
-  TableFilterDropdownModel,
+  TableColumnFilterDropdownModel,
   TablePageQuery,
   TablePagination,
   TableQueryKeyDefault,
@@ -168,7 +169,6 @@ export default defineComponent({
       draggingState: reactive({}),
       tableQueryKey: computed(() => Object.assign(TableQueryKeyDefault, props.queryKey)),
       tableResultKey: computed(() => Object.assign(TableQueryKeyDefault, props.resultKey)),
-      tableColumnsFilters: ref<TableFilterDescriptor[]>([]),
     });
 
     /**
@@ -217,7 +217,7 @@ export default defineComponent({
       }
 
       state.tableLoading = true;
-      state.fetchDataSource.filters = state.tableColumnsFilters;
+
       const pagedResult = await fetchDataSource(
         state.fetchDataSource,
         props.localData,
@@ -240,11 +240,10 @@ export default defineComponent({
 
         if (s.filter) {
           s.filterIcon = (filtered) => {
-            return <a-icon type={"search"} style={{ color: filtered ? "#108ee9" : undefined, marginTop: "13px" }} />;
+            return <a-icon class={`${filtered ? "table-filterIcon-filtered" : "table-filterIcon"}`} type={"search"} />;
           };
 
-          s.filterDropdown = (filter: TableFilterDropdownModel) => {
-            s.clearFilterDropdown = filter.clearFilters;
+          s.filterDropdown = (filter: TableColumnFilterDropdownModel) => {
             return (
               <div style={{ padding: "8px" }}>
                 <a-input
@@ -259,18 +258,6 @@ export default defineComponent({
                   size={"small"}
                   style={{ width: "100px", marginRight: "8px" }}
                   onClick={() => {
-                    const columnFilter = state.tableColumnsFilters.find((f) => f.member == filter.column.key);
-
-                    if (columnFilter) {
-                      columnFilter.value = filter.selectedKeys[0];
-                    } else {
-                      state.tableColumnsFilters.push({
-                        member: filter.column.key,
-                        value: filter.selectedKeys[0],
-                        operator: TableFilterOperatorEnum.Contains,
-                      });
-                    }
-
                     filter.confirm();
                   }}
                 >
@@ -278,9 +265,9 @@ export default defineComponent({
                 </a-button>
                 <a-button
                   size={"small"}
+                  icon={"undo"}
                   style={{ width: "100px" }}
                   onClick={() => {
-                    state.tableColumnsFilters = state.tableColumnsFilters.filter((f) => f.member != filter.column.key);
                     filter.clearFilters();
                   }}
                 >
@@ -288,6 +275,12 @@ export default defineComponent({
                 </a-button>
               </div>
             );
+          };
+        }
+
+        if ((s.filters && s.filters.length > 0) || s.filter) {
+          s.setFilterDropdown = (filter: TableColumnFilterDropdownModel) => {
+            s.clearFilterDropdown = filter.clearFilters;
           };
         }
       });
@@ -389,7 +382,6 @@ export default defineComponent({
       state.tableColumns.forEach((c) => {
         c.clearFilterDropdown && c.clearFilterDropdown();
       });
-      state.tableColumnsFilters = [];
 
       if (props.resetFunc && typeof props.resetFunc == "function") {
         const reset = props.resetFunc();
@@ -419,8 +411,9 @@ export default defineComponent({
     /**
      * 列表改变事件
      */
-    const onTableChange = async (pagination: TableDataSource, filters: any, sorter: TableSorterModel) => {
-      if (sorter) {
+    const onTableChange = async (pagination: TableDataSource, filters: TableColumnFilterModel, sorter: TableSorterModel) => {
+      state.fetchDataSource.filters = [];
+      if (sorter || filters) {
         state.tableAscOrder = [];
         state.tableDescOrder = [];
 
@@ -430,6 +423,27 @@ export default defineComponent({
           state.tableAscOrder = [key];
         } else if (sorter.order === TableOrderEnum.descend) {
           state.tableDescOrder = [key];
+        }
+
+        if (filters) {
+          Object.keys(filters).forEach((key) => {
+            const column = state.tableColumns.find((s) => s.key == key);
+            if (column && filters[key] && filters[key].length > 0) {
+              if (column.filter) {
+                state.fetchDataSource.filters.push({
+                  member: key,
+                  value: filters[key][0],
+                  operator: TableFilterOperatorEnum.Contains,
+                });
+              } else if (column.filters && column.filters.length > 0) {
+                state.fetchDataSource.filters.push({
+                  member: key,
+                  value: filters[key],
+                  operator: TableFilterOperatorEnum.IsIn,
+                });
+              }
+            }
+          });
         }
 
         await refreshTable();

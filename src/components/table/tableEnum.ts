@@ -72,4 +72,14 @@ export enum TableFilterOperatorEnum {
   /// 不包含
   /// </summary>
   DoesNotContain,
+
+  /// <summary>
+  /// 在数组中
+  /// </summary>
+  IsIn,
+
+  /// <summary>
+  /// 不在数组中
+  /// </summary>
+  IsNotIn,
 }

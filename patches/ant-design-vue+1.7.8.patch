@@ -1,0 +1,26 @@
+diff --git a/node_modules/ant-design-vue/es/table/filterDropdown.js b/node_modules/ant-design-vue/es/table/filterDropdown.js
+index c92c69d..e68bf48 100644
+--- a/node_modules/ant-design-vue/es/table/filterDropdown.js
++++ b/node_modules/ant-design-vue/es/table/filterDropdown.js
+@@ -309,6 +309,21 @@ export default {
+       });
+     }
+ 	
++	if (column.setFilterDropdown && column.setFilterDropdown instanceof Function) {
++      column.setFilterDropdown({
++        prefixCls: dropdownPrefixCls + '-custom',
++        setSelectedKeys: function setSelectedKeys(selectedKeys) {
++          return _this5.setSelectedKeys({ selectedKeys: selectedKeys });
++        },
++        selectedKeys: originSelectedKeys,
++        confirm: this.handleConfirm,
++        clearFilters: this.handleClearFilters,
++        filters: column.filters,
++        visible: this.getDropdownVisible(),
++        column: column
++      });
++    }
++
+     var menus = filterDropdown ? h(
+       FilterDropdownMenuWrapper,
+       { 'class': prefixCls + '-dropdown' },

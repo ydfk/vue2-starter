@@ -50,6 +50,7 @@ export default defineComponent({
           title: "邮箱",
           width: "10%",
           resizable: true,
+          filters: [{ text: "a@163.com", value: "a@163.com" }],
         },
         {
           key: "income",
@@ -62,11 +63,19 @@ export default defineComponent({
           title: "城市",
           width: "10%",
           resizable: true,
+          filters: [
+            { text: "北京", value: "北京" },
+            { text: "西安", value: "西安" },
+          ],
         },
         {
           key: "sex",
           title: "性别",
           width: "5%",
+          filters: [
+            { text: "男", value: "男" },
+            { text: "女", value: "女" },
+          ],
         },
         {
           key: "time",
