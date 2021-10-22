@@ -169,6 +169,7 @@ export default defineComponent({
       draggingState: reactive({}),
       tableQueryKey: computed(() => Object.assign(TableQueryKeyDefault, props.queryKey)),
       tableResultKey: computed(() => Object.assign(TableQueryKeyDefault, props.resultKey)),
+      tableColumnFilters: reactive<TableFilterDescriptor[]>([]),
     });
 
     /**
@@ -217,7 +218,7 @@ export default defineComponent({
       }
 
       state.tableLoading = true;
-
+      state.fetchDataSource.filters = JSON.parse(JSON.stringify(state.tableColumnFilters));
       const pagedResult = await fetchDataSource(
         state.fetchDataSource,
         props.localData,
@@ -412,7 +413,7 @@ export default defineComponent({
      * 列表改变事件
      */
     const onTableChange = async (pagination: TableDataSource, filters: TableColumnFilterModel, sorter: TableSorterModel) => {
-      state.fetchDataSource.filters = [];
+      state.tableColumnFilters = [];
       if (sorter || filters) {
         state.tableAscOrder = [];
         state.tableDescOrder = [];
@@ -430,13 +431,13 @@ export default defineComponent({
             const column = state.tableColumns.find((s) => s.key == key);
             if (column && filters[key] && filters[key].length > 0) {
               if (column.filter) {
-                state.fetchDataSource.filters.push({
+                state.tableColumnFilters.push({
                   member: key,
                   value: filters[key][0],
                   operator: TableFilterOperatorEnum.Contains,
                 });
               } else if (column.filters && column.filters.length > 0) {
-                state.fetchDataSource.filters.push({
+                state.tableColumnFilters.push({
                   member: key,
                   value: filters[key],
                   operator: TableFilterOperatorEnum.IsIn,
