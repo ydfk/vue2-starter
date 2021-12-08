@@ -67,7 +67,7 @@ export default defineComponent({
       default: () => TableResultKeyDefault,
       type: Object as PropType<TableResultKeyModel>,
     },
-
+    rowKey: { default: "id", type: String },
     rowSelection: { default: null, type: Object as PropType<Record<string, any>> }, // 列表选择配置
     rememberPage: { default: false, type: Boolean }, // 记住页码
     scroll: {
@@ -119,6 +119,18 @@ export default defineComponent({
     expandIcon: {},
     onlyHasDataShowExpandedRow: { default: false, type: Boolean }, //是在只有数据的时候才展示展开按钮,可使用showExpandedRowKey指定data中判断字段
     showExpandedRowKey: { default: "hasExpandedRow", type: String }, //指定dataSource中那个字段来判断展示，需要和onlyHasDataShowExpandedRow配合
+    headerLeftProps: {
+      default: () => {
+        return { xl: 18, xxl: 16 };
+      },
+      type: Object as PropType<Record<string, any>>,
+    }, //列表头部左边的属性设置
+    headerRightProps: {
+      default: () => {
+        return { xl: 6, xxl: 8 };
+      },
+      type: Object as PropType<Record<string, any>>,
+    }, //列表头部右边的属性设置
   },
   setup(props, { emit, slots }) {
     const state = reactive({
@@ -170,6 +182,16 @@ export default defineComponent({
       tableQueryKey: computed(() => Object.assign(TableQueryKeyDefault, props.queryKey)),
       tableResultKey: computed(() => Object.assign(TableQueryKeyDefault, props.resultKey)),
       tableColumnFilters: reactive<TableFilterDescriptor[]>([]),
+      tableHeaderLeftProps: computed(() => {
+        return {
+          props: props.headerLeftProps,
+        };
+      }),
+      tableHeaderRightProps: computed(() => {
+        return {
+          props: props.headerRightProps,
+        };
+      }),
     });
 
     /**
@@ -224,7 +246,8 @@ export default defineComponent({
         props.localData,
         state.tableQueryKey,
         state.tableResultKey,
-        props.childrenColumnName
+        props.childrenColumnName,
+        props.rowKey
       );
 
       // 设置排序 受控属性 来修改排序箭头样式
@@ -594,7 +617,7 @@ export default defineComponent({
         props.showHeader && (
           <div class="table-header">
             <a-row type="flex" justify="space-between">
-              <a-col xl={18} xxl={16}>
+              <a-col {...state.tableHeaderLeftProps}>
                 <div class="table-header-left">
                   {slots.headerLeft && slots.headerLeft()}
                   {props.showSearch && (
@@ -615,7 +638,7 @@ export default defineComponent({
                   {slots.headerSearchRight && slots.headerSearchRight()}
                 </div>
               </a-col>
-              <a-col xl={6} xxl={8} class="table-header-right">
+              <a-col {...state.tableHeaderRightProps} class="table-header-right">
                 <div>
                   {slots.headerRight && slots.headerRight()}
                   {props.showExportBtn && (
@@ -648,8 +671,13 @@ export default defineComponent({
         p.expandedRowKeys = props.expandedRowKeys;
       }
 
+      if (props.rowKey && props.rowKey != null) {
+        p.rowKey = props.rowKey;
+      }
+
       return { props: p };
     };
+
     const scopedSlots = () => {
       const scopedSlots: any = {};
 
@@ -736,6 +764,7 @@ export default defineComponent({
           />
         </div>
       );
+
     return () => (
       <div id={state.tableId} class={props.showWrapper ? "table wrapper" : "table"}>
         <a-skeleton loading={state.loading} active avatar>

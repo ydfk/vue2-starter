@@ -169,7 +169,8 @@ export const fetchDataSource = async (
   localData: BaseModel[],
   tableQueryKey: TableQueryKeyModel,
   tableResultKey: TableResultKeyModel,
-  childrenColumnName: string
+  childrenColumnName: string,
+  rowKey: string
 ): Promise<PagedResult<TableDataSource>> => {
   const pageQuery = Object.assign(
     {
@@ -258,6 +259,7 @@ export const fetchDataSource = async (
     fetch.pageSize,
     fetch.actionFunc,
     childrenColumnName,
+    rowKey,
     true
   );
 
@@ -392,6 +394,7 @@ const getDataSource = (
   pageSize: number,
   actionFunc: (model: BaseModel) => TableAction[],
   childrenColumnName: string,
+  rowKey: string,
   hasRecord = false
 ): Array<TableDataSource> => {
   const dataSources: Array<TableDataSource> = [];
@@ -399,7 +402,7 @@ const getDataSource = (
   if (data) {
     let record = (page - 1) * pageSize + 1;
     data.forEach((d) => {
-      const dataSource: TableDataSource = { key: d.id.toString() };
+      const dataSource: TableDataSource = { key: d[rowKey] ? d[rowKey].toString() : d.key.toString() };
 
       Object.entries(d).forEach(([key, value]) => {
         dataSource[key] = value;
@@ -417,7 +420,7 @@ const getDataSource = (
       }
 
       if (d[childrenColumnName] && d[childrenColumnName].length > 0) {
-        dataSource[childrenColumnName] = getDataSource(d[childrenColumnName], columns, page, pageSize, actionFunc, childrenColumnName, false);
+        dataSource[childrenColumnName] = getDataSource(d[childrenColumnName], columns, page, pageSize, actionFunc, childrenColumnName, rowKey, false);
       }
 
       if (hasRecord) {
