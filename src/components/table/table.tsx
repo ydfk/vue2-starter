@@ -221,8 +221,7 @@ export default defineComponent({
                   actionKey: action.key,
                 })
               )
-            }
-          >
+            }>
             {action.title}
           </a-button>
           {showDivider ? <a-divider type="vertical" /> : ""}
@@ -283,8 +282,7 @@ export default defineComponent({
                   style={{ width: "100px", marginRight: "8px" }}
                   onClick={() => {
                     filter.confirm();
-                  }}
-                >
+                  }}>
                   查询
                 </a-button>
                 <a-button
@@ -293,8 +291,7 @@ export default defineComponent({
                   style={{ width: "100px" }}
                   onClick={() => {
                     filter.clearFilters();
-                  }}
-                >
+                  }}>
                   重置
                 </a-button>
               </div>
@@ -535,9 +532,7 @@ export default defineComponent({
     registerBus(BusEnum.refreshTable, busTableRefresh);
     registerBus(BusEnum.exportTable, busTableExport);
 
-    ////生命周期
-    onMounted(async () => {
-      state.loading = true;
+    const initTable = async () => {
       restOrder();
       state.pagination.pageSize = state.maxPageSize;
       state.tableColumns = initColumns(props.columns, props.showRecord, props.ellipsis);
@@ -548,7 +543,12 @@ export default defineComponent({
           state.draggingState[col.key] = col.width;
         }
       });
+    };
 
+    ////生命周期
+    onMounted(async () => {
+      state.loading = true;
+      await initTable();
       state.loading = false;
     });
 
@@ -566,6 +566,15 @@ export default defineComponent({
       async (newVal, oldVal) => {
         if (newVal != oldVal) {
           await refreshTable();
+        }
+      }
+    );
+
+    watch(
+      () => props.columns,
+      async (newVal, oldVal) => {
+        if (newVal != oldVal) {
+          await initTable();
         }
       }
     );
